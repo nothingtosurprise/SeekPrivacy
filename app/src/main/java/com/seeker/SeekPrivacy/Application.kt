@@ -1,0 +1,13 @@
+package com.seeker.seekprivacy
+
+import android.app.Application
+import com.google.android.material.color.DynamicColors
+
+class App : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        // Apply Material You colors (if device supports)
+        DynamicColors.applyToActivitiesIfAvailable(this)
+    }
+}
+

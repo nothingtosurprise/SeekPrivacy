@@ -1,0 +1,9 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/openFile"
+        android:title="Open" />
+    <item
+        android:id="@+id/encryptAgain"
+        android:title="Encrypt Again" />
+</menu>
+
