@@ -26,7 +26,7 @@ Apps constantly request storage access ; from basic media folders to full device
 
 ---
 
-### What SeekPrivacy Does:
+### What's SeekPrivacy:
 
 * **Total App Blindness:** Any app, no matter what level of storage access it has will be unable to detect, read, or access your protected files.
 * **Seamless Access for You:** You, the owner, can still open, view, and share these files **normally**.
