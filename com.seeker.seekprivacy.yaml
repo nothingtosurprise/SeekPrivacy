@@ -1,0 +1,33 @@
+Categories:
+  - File Encryption & Vault
+  - Security
+License: MIT
+
+AuthorName: seeker
+AuthorEmail: duh-filth-obscure@duck.com
+WebSite: https://github.com/duckniii/SeekPrivacy
+SourceCode: https://github.com/duckniii/SeekPrivacy
+IssueTracker: https://github.com/duckniii/SeekPrivacy/issues
+
+RepoType: git
+Repo: https://github.com/duckniii/SeekPrivacy.git
+
+Builds:
+  - versionName: '1.5'
+    versionCode: 2
+    commit: 'v1.5'
+    subdir: app
+    gradle:
+      - yes
+    scanignore:
+      - .git
+      - .gitignore
+      - gradle
+      - gradles
+      - gradlew
+      - gradlew.bat
+      
+AutoUpdateMode: Version v%v
+UpdateCheckMode: Tags
+CurrentVersion: '1.5'
+CurrentVersionCode: 2

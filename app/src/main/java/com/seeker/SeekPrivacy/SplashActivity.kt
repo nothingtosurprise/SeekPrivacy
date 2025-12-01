@@ -40,7 +40,7 @@ class SplashActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         // Simple splash screen layout
-        val layout = FrameLayout(this)
+        /*val layout = FrameLayout(this)
         val textView = TextView(this).apply {
             text = "Made with ❤️ by Seeker."
             setTextColor(Color.WHITE)
@@ -49,7 +49,10 @@ class SplashActivity : AppCompatActivity() {
         }
         layout.setBackgroundColor(Color.BLACK)
         layout.addView(textView)
-        setContentView(layout)
+        setContentView(layout)*/
+        
+        // 🟢 NEW: Load the modern, styled XML layout file
+        setContentView(R.layout.activity_splash)
 
         // Delay splash then check permissions
         /*handler.postDelayed({

@@ -58,7 +58,7 @@ class DashboardActivity : AppCompatActivity() {
         encryptedFolderLayout = findViewById(R.id.encryptedFolderLayout)
         decryptedFolderLayout = findViewById(R.id.decryptedFolderLayout)
         
-        val contactUs = findViewById<TextView>(R.id.contactUs)
+        val contactUs = findViewById<TextView>(R.id.creatorInfo)
 val fullText = "My very first Android App: By Seeker - Founder @ SeeknWander"
 val spannable = SpannableString(fullText)
 
