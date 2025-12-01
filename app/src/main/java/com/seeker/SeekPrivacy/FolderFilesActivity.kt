@@ -229,7 +229,7 @@ class FolderFilesActivity : AppCompatActivity() {
             encryptFile(inputStream, outputFile)
             deleteExternalFile(uri)
         }
-        // MUST BE AFTER the IO block
+        // Plz MUST BE AFTER the IO block
         loadFileList()
 
     } catch (e: Exception) {
@@ -266,7 +266,7 @@ class FolderFilesActivity : AppCompatActivity() {
         }
     }
 
-    // ⚠️ MUST be outside IO block
+    // Plz MUST be outside IO block - else cause issue
     if (!hadError) {
         loadFileList()
     }
