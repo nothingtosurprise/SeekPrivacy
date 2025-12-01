@@ -18,7 +18,7 @@ Apps constantly request storage access ; from basic media folders to full device
 
 ---
 
-### SeekPrivacy eliminates that trade-off.
+### SeekPrivacy eliminates that trade-off.
 
     Unlike a traditional vault, SeekPrivacy doesn't create a segregated safe-space; it actively **cloaks and encrypts** the files you designate as private. Even if a malicious app has full access to your storage, your protected files remain completely invisible and inaccessible to them.
 
@@ -26,7 +26,7 @@ Apps constantly request storage access ; from basic media folders to full device
 
 ---
 
-### What's SeekPrivacy:
+### What's SeekPrivacy Does:
 
 * **Total App Blindness:** Any app, no matter what level of storage access it has will be unable to detect, read, or access your protected files.
 * **Seamless Access for You:** You, the owner, can still open, view, and share these files **normally**.
