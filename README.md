@@ -8,7 +8,7 @@
 
 The latest release APK is available directly on GitHub.
 
-[**Download SeekPrivacy v1.5 APK**](https://github.com/duckniii/SeekPrivacy/releases/latest/download/app-release.apk)
+[**Download SeekPrivacy v1.5 APK**](https://github.com/duckniii/SeekPrivacy/releases/latest/download/seekprivacy-app-release.apk)
 
 ---
 ## Protection Without Friction
