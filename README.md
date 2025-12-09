@@ -39,3 +39,8 @@ Apps constantly request storage access ; from basic media folders to full device
 ![Screenshot 3: Decrypt Files](images/phoneScreenshots/3.png)
 ![Screenshot 4: Decrypted Folder](images/phoneScreenshots/4.png)
 ![Screenshot 5: Open, Share, Decrypt Again](images/phoneScreenshots/5.png)
+
+
+## Logo and Branding
+
+The Seek Privacy logo is property of SeeknWander. You may not use, copy, modify, or redistribute the logo without express permission from [SeeknWander](https://seeknwander.com). All Rights Reserved.
