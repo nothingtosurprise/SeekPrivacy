@@ -6,9 +6,15 @@
 
 ## ⬇️ Download & Installation
 
-The latest release APK is available directly on GitHub.
 
-[**Download SeekPrivacy v1.5 APK**](https://github.com/duckniii/SeekPrivacy/releases/latest/download/seekprivacy-app-release.apk)
+
+[**Download SeekPrivacy v1.5 APK from Github**](https://github.com/duckniii/SeekPrivacy/releases/latest/download/seekprivacy-app-release.apk)
+
+[**OR Download SeekPrivacy from AndroidFreeWare**](https://www.androidfreeware.net/download-seekprivacy-apk.html)
+
+[**OR Download SeekPrivacy From OpenApk**](https://www.openapk.net/seekprivacy/com.seeker.seekprivacy/)
+
+[**OR on Fdroid using Izzysoft Repo**](https://apt.izzysoft.de/packages/com.seeker.seekprivacy)
 
 ---
 ## Protection Without Friction
