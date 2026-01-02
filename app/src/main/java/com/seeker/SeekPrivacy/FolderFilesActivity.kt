@@ -89,31 +89,32 @@ class FolderFilesActivity : AppCompatActivity() {
             masterKey = loadOrCreateMasterKey()
         }
 
-        openDocumentLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                if (result.resultCode == Activity.RESULT_OK) {
-                    result.data?.let { data ->
-                        val clipData = data.clipData
-                        if (clipData != null) {
-                            for (i in 0 until clipData.itemCount) {
-                                val uri = clipData.getItemAt(i).uri
-                                lifecycleScope.launch {
-                                    if (isEncryptedFolder) encryptFileUri(uri) else decryptFileUri(uri)
-                                }
-                            }
-                        } else {
-                            data.data?.let { uri ->
-                                lifecycleScope.launch {
-                                    if (isEncryptedFolder) encryptFileUri(uri) else decryptFileUri(uri)
-                                }
-                            }
-                        }
-                    }
+        openDocumentLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    if (result.resultCode == Activity.RESULT_OK) {
+        result.data?.let { data ->
+            val uris = mutableListOf<Uri>()
+            val clipData = data.clipData
+            if (clipData != null) {
+                for (i in 0 until clipData.itemCount) {
+                    uris.add(clipData.getItemAt(i).uri)
                 }
+            } else {
+                data.data?.let { uris.add(it) }
             }
 
-        loadFileList()
+            // ONE coroutine for ALL files
+            lifecycleScope.launch {
+                showLoadingDialog("Processing ${uris.size} files...")
+                uris.forEach { uri ->
+                    if (isEncryptedFolder) encryptFileUri(uri, hideDialog = false) 
+                    else decryptFileUri(uri, hideDialog = false)
+                }
+                loadFileList() // Refresh list once at the end
+                hideLoadingDialog()
+            }
+        }
     }
+}
 
     // -------------------- KEY MANAGEMENT --------------------
     private fun loadOrCreateMasterKey(): SecretKey {
@@ -219,7 +220,7 @@ class FolderFilesActivity : AppCompatActivity() {
         openDocumentLauncher.launch(intent)
     }
 
-    private suspend fun encryptFileUri(uri: Uri) {
+    private suspend fun encryptFileUri(uri: Uri, hideDialog: Boolean = true) {
     showLoadingDialog("Encrypting file...")
     try {
         withContext(Dispatchers.IO) {
