@@ -24,11 +24,26 @@ class FileAdapter(private val fileList: List<File>, private val onItemClick: (Fi
     }
 
     override fun onBindViewHolder(holder: FileViewHolder, position: Int) {
-        val file = fileList[position]
-        holder.fileNameTextView.text = file.name
-        holder.itemView.setOnClickListener { onItemClick(file) }
-        // Optional: set file icon based on file type
+    val file = fileList[position]
+    holder.fileNameTextView.text = file.name
+
+    when {
+        file.isDirectory -> {
+            holder.fileIcon.setImageResource(R.drawable.ic_folder)
+        }
+        file.name.endsWith(".enc") -> {
+            holder.fileIcon.setImageResource(R.drawable.ic_lock)
+        }
+        else -> {
+            // Optional: You could add logic here to show different icons 
+            // for .jpg, .pdf, .mp4, etc. 
+            // For now, the default file icon is perfect.
+            holder.fileIcon.setImageResource(R.drawable.ic_file)
+        }
     }
+
+    holder.itemView.setOnClickListener { onItemClick(file) }
+}
 
     override fun getItemCount(): Int = fileList.size
 }

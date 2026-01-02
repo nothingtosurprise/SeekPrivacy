@@ -45,6 +45,14 @@ class FolderFilesActivity : AppCompatActivity() {
     private lateinit var addFileFab: FloatingActionButton
     private lateinit var recyclerView: RecyclerView
     private lateinit var fileAdapter: FileAdapter
+    
+    // Keep these! They define the physical storage locations
+private val encryptedDir by lazy { File(getExternalFilesDir(null), "Encrypted") }
+private val decryptedDir by lazy { File(getExternalFilesDir(null), "Decrypted") }
+
+// Add these to manage navigation
+private lateinit var rootDir: File
+private lateinit var currentDir: File
 
     private var progressDialog: AlertDialog? = null
     private val encryptedFiles = mutableListOf<File>()
@@ -52,8 +60,7 @@ class FolderFilesActivity : AppCompatActivity() {
     private lateinit var verificationString: String
     private lateinit var openDocumentLauncher: ActivityResultLauncher<Intent>
 
-    private val encryptedDir by lazy { File(getExternalFilesDir(null), "Encrypted") }
-    private val decryptedDir by lazy { File(getExternalFilesDir(null), "Decrypted") }
+
     private val KEYSTORE_ALIAS = "seekPrivacyRSAKey"
     private val LAST_SURVIVAL_FILE = ".lastsurvival"
     private lateinit var masterKey: SecretKey
@@ -67,6 +74,8 @@ class FolderFilesActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.filesRecyclerView)
 
         isEncryptedFolder = intent.getBooleanExtra("isEncryptedFolder", true)
+        rootDir = if (isEncryptedFolder) encryptedDir else decryptedDir
+        currentDir = rootDir
         verificationString = intent.getStringExtra("verificationString") ?: run {
             Toast.makeText(this, "Verification string missing", Toast.LENGTH_LONG).show()
             finish()
@@ -76,10 +85,24 @@ class FolderFilesActivity : AppCompatActivity() {
         toolbar.title = if (isEncryptedFolder) "Encrypted Files" else "Decrypted Files"
         toolbar.setNavigationIcon(R.drawable.ic_back)
         toolbar.setNavigationOnClickListener { onBackPressedDispatcher.onBackPressed() }
+        toolbar.inflateMenu(R.menu.files_menu) // Create a menu with a "New Folder" icon
+        toolbar.setOnMenuItemClickListener {
+           if (it.itemId == R.id.action_new_folder) {
+           showNewFolderDialog()
+            true
+           } else false
+}
 
         fileAdapter = FileAdapter(encryptedFiles) { file ->
-            if (isEncryptedFolder) promptDecryptFile(file) else promptEncryptFile(file)
-        }
+    if (file.isDirectory) {
+        currentDir = file // Set the new current directory
+        loadFileList()    // Refresh the screen to show what's inside
+    } else {
+        // This is where you'll call your new options dialog (see below)
+        showFileOptionsDialog(file) 
+    }
+}
+
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = fileAdapter
 
@@ -93,6 +116,8 @@ class FolderFilesActivity : AppCompatActivity() {
     if (result.resultCode == Activity.RESULT_OK) {
         result.data?.let { data ->
             val uris = mutableListOf<Uri>()
+            
+            // Correctly handles single or multiple file selection
             val clipData = data.clipData
             if (clipData != null) {
                 for (i in 0 until clipData.itemCount) {
@@ -102,14 +127,20 @@ class FolderFilesActivity : AppCompatActivity() {
                 data.data?.let { uris.add(it) }
             }
 
-            // ONE coroutine for ALL files
+            // Starts ONE coroutine and ONE dialog for the whole group
             lifecycleScope.launch {
                 showLoadingDialog("Processing ${uris.size} files...")
+                
                 uris.forEach { uri ->
-                    if (isEncryptedFolder) encryptFileUri(uri, hideDialog = false) 
-                    else decryptFileUri(uri, hideDialog = false)
+                    if (isEncryptedFolder) {
+                        encryptFileUri(uri, isBatch = true) 
+                    } else {
+                        decryptFileUri(uri, isBatch = true)
+                    }
                 }
-                loadFileList() // Refresh list once at the end
+                
+                // Refresh list and hide dialog ONLY once at the very end
+                loadFileList() 
                 hideLoadingDialog()
             }
         }
@@ -196,20 +227,25 @@ class FolderFilesActivity : AppCompatActivity() {
     private fun hideLoadingDialog() { progressDialog?.dismiss() }
 
     private fun loadFileList() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            val dir = if (isEncryptedFolder) encryptedDir else decryptedDir
-            if (!dir.exists()) dir.mkdirs()
-            val files = dir.listFiles()?.toList() ?: emptyList()
-            val filteredFiles = if (isEncryptedFolder) {
-                files.filter { it.isFile && it.name.endsWith(".enc") }
-            } else {
-                files.filter { it.isFile && !it.name.endsWith(".enc") }
-            }
+    lifecycleScope.launch(Dispatchers.IO) {
+        if (!currentDir.exists()) currentDir.mkdirs()
+        
+        // List everything, but ignore the ".lastsurvival" key file
+        val allFiles = currentDir.listFiles()?.filter { it.name != LAST_SURVIVAL_FILE } ?: emptyList()
+        
+        // Sort: Folders first, then Files
+        val sortedList = allFiles.sortedWith(compareBy({ !it.isDirectory }, { it.name.lowercase() }))
+
+        withContext(Dispatchers.Main) {
             encryptedFiles.clear()
-            encryptedFiles.addAll(filteredFiles)
-            withContext(Dispatchers.Main) { fileAdapter.notifyDataSetChanged() }
+            encryptedFiles.addAll(sortedList)
+            fileAdapter.notifyDataSetChanged()
+            
+            // Update toolbar subtitle to show current path relative to root
+            toolbar.subtitle = currentDir.absolutePath.removePrefix(rootDir.absolutePath)
         }
     }
+}
 
     private fun openFilePicker() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -220,59 +256,59 @@ class FolderFilesActivity : AppCompatActivity() {
         openDocumentLauncher.launch(intent)
     }
 
-    private suspend fun encryptFileUri(uri: Uri, hideDialog: Boolean = true) {
-    showLoadingDialog("Encrypting file...")
+    private suspend fun encryptFileUri(uri: Uri, isBatch: Boolean = false) {
+    if (!isBatch) showLoadingDialog("Encrypting file...")
     try {
         withContext(Dispatchers.IO) {
             val inputStream = contentResolver.openInputStream(uri) ?: return@withContext
             val fileName = queryFileName(uri) ?: "unknownfile"
-            val outputFile = File(encryptedDir, "$fileName.enc")
+            
+            // FIX: Saves to your current folder location
+            val outputFile = File(currentDir, "$fileName.enc")
+            
             encryptFile(inputStream, outputFile)
             deleteExternalFile(uri)
         }
-        // Plz MUST BE AFTER the IO block
-        loadFileList()
+        
+        // Plz MUST BE AFTER the IO block (Your original UI stability logic)
+        if (!isBatch) loadFileList()
 
     } catch (e: Exception) {
-        Toast.makeText(this, "Encryption failed: ${e.message}", Toast.LENGTH_LONG).show()
+        withContext(Dispatchers.Main) {
+            Toast.makeText(this@FolderFilesActivity, "Encryption failed: ${e.message}", Toast.LENGTH_LONG).show()
+        }
     }
-    hideLoadingDialog()
+    if (!isBatch) hideLoadingDialog()
 }
 
 
-    private suspend fun decryptFileUri(uri: Uri) {
-    showLoadingDialog("Decrypting file...")
-
+    private suspend fun decryptFileUri(uri: Uri, isBatch: Boolean = false) {
+    if (!isBatch) showLoadingDialog("Decrypting file...")
     var hadError = false
 
     withContext(Dispatchers.IO) {
         try {
             val inputStream = contentResolver.openInputStream(uri) ?: return@withContext
             val fileName = queryFileName(uri)?.removeSuffix(".enc") ?: "unknownfile"
-            val outputFile = File(decryptedDir, fileName)
+            
+            // FIX: Saves to your current folder location
+            val outputFile = File(currentDir, fileName)
 
-            // Do the real work
             decryptFile(inputStream, outputFile)
             deleteExternalFile(uri)
-
         } catch (e: Exception) {
             hadError = true
-            runOnUiThread {
-                Toast.makeText(
-                    this@FolderFilesActivity,
-                    "Decryption failed: ${e.message}",
-                    Toast.LENGTH_LONG
-                ).show()
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@FolderFilesActivity, "Decryption failed: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
 
-    // Plz MUST be outside IO block - else cause issue
-    if (!hadError) {
+    // Plz MUST be outside IO block (Your original UI stability logic)
+    if (!hadError && !isBatch) {
         loadFileList()
     }
-
-    hideLoadingDialog()
+    if (!isBatch) hideLoadingDialog()
 }
 
 
@@ -309,27 +345,33 @@ class FolderFilesActivity : AppCompatActivity() {
 
 
     private fun promptDecryptFile(file: File) {
-        val input = android.widget.EditText(this).apply { inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD }
-        AlertDialog.Builder(this)
-            .setTitle("Decrypt File")
-            .setMessage("Enter verification string to decrypt")
-            .setView(input)
-            .setPositiveButton("Decrypt") { dialog, _ ->
-                if (input.text.toString() == verificationString) {
-                    dialog.dismiss()
-                    lifecycleScope.launch {
-                        decryptFile(FileInputStream(file), File(decryptedDir, file.name.removeSuffix(".enc")))
-                        file.delete()
-                        loadFileList()
-                    }
-                } else Toast.makeText(this, "Incorrect verification string.", Toast.LENGTH_SHORT).show()
-            }
-            .setNeutralButton("Open") { dialog, _ ->
+    val input = android.widget.EditText(this).apply { inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_PASSWORD }
+    AlertDialog.Builder(this)
+        .setTitle("Decrypt File")
+        .setMessage("Enter verification string to decrypt")
+        .setView(input)
+        .setPositiveButton("Decrypt") { dialog, _ ->
+            if (input.text.toString() == verificationString) {
                 dialog.dismiss()
-                openFileWithProvider(file)
-            }
-            .show()
-    }
+                showLoadingDialog("Decrypting...") // Show progress
+                lifecycleScope.launch {
+                    withContext(Dispatchers.IO) { // Move to background thread
+                        // FIX: Changed decryptedDir to currentDir
+                        val decryptedFile = File(currentDir, file.name.removeSuffix(".enc"))
+                        decryptFile(FileInputStream(file), decryptedFile)
+                        file.delete()
+                    }
+                    loadFileList() // Refresh UI
+                    hideLoadingDialog()
+                }
+            } else Toast.makeText(this, "Incorrect verification string.", Toast.LENGTH_SHORT).show()
+        }
+        .setNeutralButton("Open") { dialog, _ ->
+            dialog.dismiss()
+            openFileWithProvider(file)
+        }
+        .show()
+}
 
 private fun promptEncryptFile(file: File) {
     AlertDialog.Builder(this)
@@ -337,11 +379,16 @@ private fun promptEncryptFile(file: File) {
         .setMessage("Do you want to encrypt this file again?")
         .setPositiveButton("Encrypt") { dialog, _ ->
             dialog.dismiss()
+            showLoadingDialog("Encrypting...")
             lifecycleScope.launch {
-                val encryptedFile = File(encryptedDir, "${file.name}.enc")
-                encryptFile(FileInputStream(file), encryptedFile)
-                file.delete()
+                withContext(Dispatchers.IO) { // Move to background thread
+                    // FIX: Changed encryptedDir to currentDir
+                    val encryptedFile = File(currentDir, "${file.name}.enc")
+                    encryptFile(FileInputStream(file), encryptedFile)
+                    file.delete()
+                }
                 loadFileList()
+                hideLoadingDialog()
             }
         }
         .setNeutralButton("Open") { dialog, _ ->
@@ -350,17 +397,7 @@ private fun promptEncryptFile(file: File) {
         }
         .setNegativeButton("Share") { dialog, _ ->
             dialog.dismiss()
-            try {
-                val uri = FileProvider.getUriForFile(this, "${packageName}.provider", file)
-                val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                    type = "*/*"
-                    putExtra(Intent.EXTRA_STREAM, uri)
-                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                }
-                startActivity(Intent.createChooser(shareIntent, "Share decrypted file"))
-            } catch (e: Exception) {
-                Toast.makeText(this, "Unable to share file: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
+            shareFile(file) // Use your existing shareFile function here
         }
         .show()
 }
@@ -403,5 +440,83 @@ private fun deleteExternalFile(uri: Uri): Boolean {
         }
         return null
     }
+    
+    private fun showNewFolderDialog() {
+    val input = android.widget.EditText(this).apply { hint = "Folder Name" }
+    AlertDialog.Builder(this)
+        .setTitle("New Folder")
+        .setView(input)
+        .setPositiveButton("Create") { _, _ ->
+            val newDir = File(currentDir, input.text.toString())
+            if (newDir.mkdir()) loadFileList() 
+            else Toast.makeText(this, "Failed to create folder", Toast.LENGTH_SHORT).show()
+        }
+        .show()
+}
+
+    override fun onBackPressed() {
+    // If the user is in a subfolder, go back to the parent folder
+    if (currentDir != rootDir) {
+        currentDir = currentDir.parentFile ?: rootDir
+        loadFileList()
+    } else {
+        // If they are already at the root, close the activity normally
+        super.onBackPressed()
+    }
+}
+
+  private fun showFileOptionsDialog(file: File) {
+    val options = arrayOf("Open", "Rename", if (isEncryptedFolder) "Decrypt" else "Encrypt", "Share", "Delete")
+    
+    AlertDialog.Builder(this)
+        .setTitle(file.name)
+        .setItems(options) { _, which ->
+            when (which) {
+                0 -> openFileWithProvider(file)
+                1 -> showRenameDialog(file)
+                2 -> if (isEncryptedFolder) promptDecryptFile(file) else promptEncryptFile(file)
+                3 -> shareFile(file)
+                4 -> {
+                    file.delete()
+                    loadFileList()
+                }
+            }
+        }
+        .show()
+}
+
+   private fun showRenameDialog(file: File) {
+    val input = android.widget.EditText(this).apply {
+        setText(file.name)
+        selectAll()
+    }
+    AlertDialog.Builder(this)
+        .setTitle("Rename")
+        .setView(input)
+        .setPositiveButton("OK") { _, _ ->
+            val newName = input.text.toString()
+            if (newName.isNotEmpty()) {
+                val newFile = File(file.parentFile, newName)
+                if (file.renameTo(newFile)) loadFileList()
+                else Toast.makeText(this, "Rename failed", Toast.LENGTH_SHORT).show()
+            }
+        }
+        .setNegativeButton("Cancel", null)
+        .show()
+}
+
+   private fun shareFile(file: File) {
+    try {
+        val uri = FileProvider.getUriForFile(this, "${packageName}.provider", file)
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "*/*"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        startActivity(Intent.createChooser(intent, "Share via"))
+    } catch (e: Exception) {
+        Toast.makeText(this, "Cannot share: ${e.message}", Toast.LENGTH_SHORT).show()
+    }
+}
 }
 
