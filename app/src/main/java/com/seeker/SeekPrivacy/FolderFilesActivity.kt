@@ -242,7 +242,7 @@ searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.
     lifecycleScope.launch(Dispatchers.IO) {
         if (!currentDir.exists()) currentDir.mkdirs()
         
-        val allFiles = currentDir.listFiles()?.filter { it.name != LAST_SURVIVAL_FILE } ?: emptyList()
+        val allFiles = currentDir.listFiles()?.filter { it.name != LAST_SURVIVAL_FILE } ?: emptyList<File>()
         
         // Sorting: Folders first, then alphabetically
         val sortedList = allFiles.sortedWith(compareBy({ !it.isDirectory }, { it.name.lowercase() }))
@@ -438,20 +438,17 @@ searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.
 }
 
 private fun showMoveDialog(file: File) {
-    // 1. Get subfolders
-    val subFolders = currentDir.listFiles { file -> file.isDirectory }?.toList() ?: emptyList()
-    
-    // 2. Prepare the list of names for the Dialog
+    // Explicitly name 'f' to avoid ambiguity
+    val subFolders = currentDir.listFiles { f -> f.isDirectory }?.toList() ?: emptyList<File>()
     val options = mutableListOf<String>()
     
-    // Add "Move Up" option if we aren't at the root
     val isAtRoot = (currentDir.path == encryptedDir.path || currentDir.path == decryptedDir.path)
     if (!isAtRoot) {
         options.add(".. (Move to Parent Folder)")
     }
     
-    // Add the subfolder names
-    options.addAll(subFolders.map { it.name })
+    // Explicitly name 'folder' to be safe
+    options.addAll(subFolders.map { folder -> folder.name })
 
     if (options.isEmpty()) {
         Toast.makeText(this, "No folders to move to", Toast.LENGTH_SHORT).show()
@@ -462,9 +459,8 @@ private fun showMoveDialog(file: File) {
         .setTitle("Move ${file.name} to:")
         .setItems(options.toTypedArray()) { _, which ->
             val targetDir = if (!isAtRoot && which == 0) {
-                currentDir.parentFile // Move to parent
+                currentDir.parentFile
             } else {
-                // If we moved up, the index shifts, so we adjust
                 val folderIndex = if (!isAtRoot) which - 1 else which
                 subFolders[folderIndex]
             }
@@ -481,7 +477,6 @@ private fun showMoveDialog(file: File) {
         }
         .show()
 }
-
 
 private fun confirmDeletion(file: File) {
     AlertDialog.Builder(this)
