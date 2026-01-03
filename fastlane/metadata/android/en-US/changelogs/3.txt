@@ -1,6 +1,10 @@
 V2.0 Release:
-- Massive performance boost: Removed freezing during encryption.
-- File Management and Categorization: Create subfolders, rename, and move files easily.
-- Stay Organized: New search bar and file counter.
-- Enhanced Control: Permanently delete files and perform advanced operations.
-- UI improvements for a smoother privacy experience.
+
+-  Removed freeze issue in loading bar while encryption
+-  create sub folders for categorization
+-  rename files
+-  count files
+-  search the files
+-  delete the file permanently
+-  Move files through sub folders
+-  More Operations on Files
