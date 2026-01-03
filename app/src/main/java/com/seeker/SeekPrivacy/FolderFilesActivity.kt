@@ -44,8 +44,11 @@ class FolderFilesActivity : AppCompatActivity() {
     private lateinit var addFileFab: FloatingActionButton
     private lateinit var recyclerView: RecyclerView
     private lateinit var fileAdapter: FileAdapter
-    private lateinit var searchBar: SearchView
-    private lateinit var countme: TextView
+    
+    
+    private lateinit var searchView: androidx.appcompat.widget.SearchView
+private lateinit var countTextView: TextView
+private var allFilesMasterList: List<File> = listOf()
     
 
     private val encryptedDir by lazy { File(getExternalFilesDir(null), "Encrypted") }
@@ -71,8 +74,17 @@ class FolderFilesActivity : AppCompatActivity() {
         toolbar = findViewById(R.id.topAppBar)
         addFileFab = findViewById(R.id.addFileFab)
         recyclerView = findViewById(R.id.filesRecyclerView)
-        searchBar = findViewById(R.id.searchview)
-        countme = findViewById(R.id.countme)
+        searchView = findViewById(R.id.searchview)
+countTextView = findViewById(R.id.count)
+
+searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
+    override fun onQueryTextSubmit(query: String?): Boolean = false
+
+    override fun onQueryTextChange(newText: String?): Boolean {
+        filterFiles(newText ?: "")
+        return true
+    }
+})
 
         isEncryptedFolder = intent.getBooleanExtra("isEncryptedFolder", true)
         rootDir = if (isEncryptedFolder) encryptedDir else decryptedDir
@@ -408,22 +420,52 @@ class FolderFilesActivity : AppCompatActivity() {
         .show()
 }
 
-private fun showMoveDialog(file: File)
-{
-  val subfolders = currentDir.listFiles { it.isDirectory }?.toList() ?:emptyList()
-  
-  val options = mutableListOf<String>()
-  
-  val isAtRoot = (currentDir.path == encryptedDir.path || currentDir.path == decryptedDir)
-  
-  if(!isAtRoot)
-  {
-    options.add(".. (Move to Parent Folder)")
+private fun showMoveDialog(file: File) {
+    // 1. Get subfolders
+    val subFolders = currentDir.listFiles { it.isDirectory }?.toList() ?: emptyList()
     
-  }
-  
-  
+    // 2. Prepare the list of names for the Dialog
+    val options = mutableListOf<String>()
+    
+    // Add "Move Up" option if we aren't at the root
+    val isAtRoot = (currentDir.path == encryptedDir.path || currentDir.path == decryptedDir.path)
+    if (!isAtRoot) {
+        options.add(".. (Move to Parent Folder)")
+    }
+    
+    // Add the subfolder names
+    options.addAll(subFolders.map { it.name })
+
+    if (options.isEmpty()) {
+        Toast.makeText(this, "No folders to move to", Toast.LENGTH_SHORT).show()
+        return
+    }
+
+    AlertDialog.Builder(this)
+        .setTitle("Move ${file.name} to:")
+        .setItems(options.toTypedArray()) { _, which ->
+            val targetDir = if (!isAtRoot && which == 0) {
+                currentDir.parentFile // Move to parent
+            } else {
+                // If we moved up, the index shifts, so we adjust
+                val folderIndex = if (!isAtRoot) which - 1 else which
+                subFolders[folderIndex]
+            }
+
+            if (targetDir != null) {
+                val destFile = File(targetDir, file.name)
+                if (file.renameTo(destFile)) {
+                    loadFileList()
+                    Toast.makeText(this, "File moved", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Move failed", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+        .show()
 }
+
+
 private fun confirmDeletion(file: File) {
     AlertDialog.Builder(this)
         .setTitle("Delete ${file.name}?")
@@ -513,4 +555,15 @@ private fun promptEncryptFile(file: File) {
             Toast.makeText(this, "Cannot share: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
+    
+    private fun filterFiles(query: String) {
+    val filteredList = if (query.isEmpty()) {
+        allFilesMasterList
+    } else {
+        allFilesMasterList.filter { it.name.contains(query, ignoreCase = true) }
+    }
+    
+    // Assuming your adapter has a method called updateData
+    fileAdapter.updateData(filteredList)
+}
 }
