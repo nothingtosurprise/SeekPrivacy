@@ -181,11 +181,11 @@
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"
                 android:layout_marginBottom="4dp"/>
-
-            <TextView
+                
+             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="2. Tap 'Decrypted' to see all decrypted files and to open, share, encrypt again."
+                android:text="2. You could encrypt multiple Files. Rename, Delete, Move between Sub Folders"
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"
                 android:layout_marginBottom="4dp"/>
@@ -193,14 +193,22 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="3. Warning: Uninstalling or clearing app data will permanently delete all files."
+                android:text="3. Tap 'Decrypted' to see all decrypted files and to open, share, encrypt again, Rename, Delete, Move."
+                android:textColor="#BDBDBD"
+                android:textSize="14sp"
+                android:layout_marginBottom="4dp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="4. Warning: Uninstalling or clearing app data will permanently delete all files."
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"/>
                 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="4. AES/CBC/PKCS5Padding Used"
+                android:text="5. AES/CBC/PKCS5Padding Used"
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"/>
 

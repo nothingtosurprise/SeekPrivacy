@@ -38,6 +38,18 @@ Apps constantly request storage access ; from basic media folders to full device
 * **Seamless Access for You:** You, the owner, can still open, view, and share these files **normally**.
 * **Deep Security:** Because your files are encrypted, they are also protected from anyone gaining direct, physical access to your device's storage.
 
+
+### What's New in V2.0
+
+* **Removed freeze issue in loading bar while encryption** 
+* **create sub folders for categorization** 
+* **rename files**
+* **count files**
+* **search the files**
+* **delete the file permanently**
+* **Move files through sub folders**
+* **More Operations on Files**
+
 ### Screenshots
 
 ![Screenshot 1: Dashboard](images/phoneScreenshots/1.png)
@@ -45,6 +57,7 @@ Apps constantly request storage access ; from basic media folders to full device
 ![Screenshot 3: Decrypt Files](images/phoneScreenshots/3.png)
 ![Screenshot 4: Decrypted Folder](images/phoneScreenshots/4.png)
 ![Screenshot 5: Open, Share, Decrypt Again](images/phoneScreenshots/5.png)
+![Screenshot 6: Version2 Categorization n other features overview](images/phoneScreenshots/morefeatures-v2.png)
 
 
 ## Logo and Branding
