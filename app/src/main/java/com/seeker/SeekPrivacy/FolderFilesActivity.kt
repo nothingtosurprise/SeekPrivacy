@@ -239,20 +239,37 @@ searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.
     private fun hideLoadingDialog() { progressDialog?.dismiss() }
 
     private fun loadFileList() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            if (!currentDir.exists()) currentDir.mkdirs()
-            val allFiles = currentDir.listFiles()?.filter { it.name != LAST_SURVIVAL_FILE } ?: emptyList()
-            val sortedList = allFiles.sortedWith(compareBy({ !it.isDirectory }, { it.name.lowercase() }))
+    lifecycleScope.launch(Dispatchers.IO) {
+        if (!currentDir.exists()) currentDir.mkdirs()
+        
+        val allFiles = currentDir.listFiles()?.filter { it.name != LAST_SURVIVAL_FILE } ?: emptyList()
+        
+        // Sorting: Folders first, then alphabetically
+        val sortedList = allFiles.sortedWith(compareBy({ !it.isDirectory }, { it.name.lowercase() }))
 
-            withContext(Dispatchers.Main) {
-                encryptedFiles.clear()
-                encryptedFiles.addAll(sortedList)
-                fileAdapter.notifyDataSetChanged()
-                val displayPath = currentDir.absolutePath.removePrefix(rootDir.absolutePath)
-                toolbar.subtitle = if (displayPath.isEmpty()) "Root" else displayPath
+        withContext(Dispatchers.Main) {
+            // 1. Update the Master List for the Search feature
+            allFilesMasterList = sortedList 
+
+            // 2. Update the Count TextView
+            countTextView.text = "${sortedList.size} Files"
+
+            // 3. Clear and add to the adapter's list
+            encryptedFiles.clear()
+            encryptedFiles.addAll(sortedList)
+            fileAdapter.notifyDataSetChanged()
+
+            val displayPath = currentDir.absolutePath.removePrefix(rootDir.absolutePath)
+            toolbar.subtitle = if (displayPath.isEmpty()) "Root" else displayPath
+            
+            // 4. If there is text in the search bar, re-apply the filter
+            val currentQuery = searchView.query.toString()
+            if (currentQuery.isNotEmpty()) {
+                filterFiles(currentQuery)
             }
         }
     }
+}
 
     private fun openFilePicker() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -422,7 +439,7 @@ searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.
 
 private fun showMoveDialog(file: File) {
     // 1. Get subfolders
-    val subFolders = currentDir.listFiles { it.isDirectory }?.toList() ?: emptyList()
+    val subFolders = currentDir.listFiles { file -> file.isDirectory }?.toList() ?: emptyList()
     
     // 2. Prepare the list of names for the Dialog
     val options = mutableListOf<String>()
@@ -563,7 +580,14 @@ private fun promptEncryptFile(file: File) {
         allFilesMasterList.filter { it.name.contains(query, ignoreCase = true) }
     }
     
-    // Assuming your adapter has a method called updateData
+    // Update the list on screen
     fileAdapter.updateData(filteredList)
+
+    // NEW: Update the count text to show search results
+    if (query.isEmpty()) {
+        countTextView.text = "${allFilesMasterList.size} Files"
+    } else {
+        countTextView.text = "${filteredList.size} of ${allFilesMasterList.size} found"
+    }
 }
 }
