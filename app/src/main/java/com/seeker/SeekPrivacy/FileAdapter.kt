@@ -10,7 +10,7 @@ import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
 
-class FileAdapter(private val fileList: List<File>, private val onItemClick: (File) -> Unit) :
+class FileAdapter(private var fileList: List<File>, private val onItemClick: (File) -> Unit) :
     RecyclerView.Adapter<FileAdapter.FileViewHolder>() {
 
     class FileViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -24,7 +24,7 @@ class FileAdapter(private val fileList: List<File>, private val onItemClick: (Fi
     }
 
     override fun onBindViewHolder(holder: FileViewHolder, position: Int) {
-    val file = fileList[position]
+    var file = fileList[position]
     holder.fileNameTextView.text = file.name
 
     when {
@@ -35,7 +35,7 @@ class FileAdapter(private val fileList: List<File>, private val onItemClick: (Fi
             holder.fileIcon.setImageResource(R.drawable.ic_lock)
         }
         else -> {
-            // Optional: You could add logic here to show different icons 
+
             // for .jpg, .pdf, .mp4, etc. 
             // For now, the default file icon is perfect.
             holder.fileIcon.setImageResource(R.drawable.ic_file)
@@ -46,5 +46,10 @@ class FileAdapter(private val fileList: List<File>, private val onItemClick: (Fi
 }
 
     override fun getItemCount(): Int = fileList.size
+    
+    fun updateData(newList: List<File>) {
+    this.fileList = newList // Replace the old list with the filtered one
+    notifyDataSetChanged()  // Tellz the UI to redraw the list immediately
+}
 }
 
