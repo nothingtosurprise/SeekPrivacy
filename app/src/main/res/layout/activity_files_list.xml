@@ -4,7 +4,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#121212"> <com.google.android.material.appbar.AppBarLayout
+    android:background="#121212"> 
+    
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#1F1F1F"
@@ -17,7 +19,17 @@
             app:titleTextColor="@android:color/white"
             app:titleCentered="true"
             app:title="Files"
-            app:navigationIcon="@drawable/ic_back" app:navigationIconTint="@android:color/white" /> </com.google.android.material.appbar.AppBarLayout>
+            app:navigationIcon="@drawable/ic_back" app:navigationIconTint="@android:color/white" /> 
+            
+       <androidx.appcompat.widget.SearchView
+           android:id="@+id/searchview"
+           android:layout_width="match_parent"
+           android:layout_height="wrap_content"
+           app:queryHint="Search Files..."
+           app:iconifiedByDefault="false"
+       
+       />
+            </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout
         android:orientation="vertical"
@@ -43,4 +55,19 @@
         app:layout_anchor="@id/filesRecyclerView"
         app:layout_anchorGravity="bottom|end"
         android:layout_margin="24dp"
-        app:tint="@android:color/black" app:backgroundTint="#FF9800" /> </androidx.coordinatorlayout.widget.CoordinatorLayout>
+        app:tint="@android:color/black" app:backgroundTint="#FF9800" /> 
+        
+    <TextView
+       android:id="@+id/count"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:text="0 Files"
+       android:textColor="#FFFFFF"
+       android:textSize="14sp"
+       android:layout_gravity="bottom|center"
+    
+    />
+    
+        
+        
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
