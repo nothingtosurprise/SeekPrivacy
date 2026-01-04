@@ -1,0 +1,1 @@
+V2.0.1: Quick optimization to streamline permissions for Android 13+ users.

@@ -96,13 +96,21 @@ class DashboardActivity : AppCompatActivity() {
         }
     }
 
+    //Asking permission till 12
     private fun checkPermissionsAtStartup() {
+
+    if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+
         if (!areReadWritePermissionsGranted()) {
             showPermissionExplanationDialog()
         } else {
             permissionsChecked = true
         }
+    } else {
+
+        permissionsChecked = true
     }
+}
 
     private fun handleFolderClick() {
         if (!permissionsChecked) {
@@ -126,7 +134,7 @@ class DashboardActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle("Storage Permissions Required")
             .setMessage(
-                "SeekPrivacy needs Storage permissions to manage your encrypted files safely.\n\nPlease grant permissions to continue."
+                "Below Android 13 SeekPrivacy needs Storage permissions to manage your encrypted files safely.\n\nPlease grant permissions to continue."
             )
             .setCancelable(false)
             .setPositiveButton("Grant Permissions") { _, _ ->
