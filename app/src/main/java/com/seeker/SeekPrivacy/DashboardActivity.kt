@@ -134,7 +134,7 @@ class DashboardActivity : AppCompatActivity() {
         AlertDialog.Builder(this)
             .setTitle("Storage Permissions Required")
             .setMessage(
-                "Below Android 13 SeekPrivacy needs Storage permissions to manage your encrypted files safely.\n\nPlease grant permissions to continue."
+                "SeekPrivacy needs Storage permissions to manage your encrypted files safely.\n\nPlease grant permissions to continue."
             )
             .setCancelable(false)
             .setPositiveButton("Grant Permissions") { _, _ ->
