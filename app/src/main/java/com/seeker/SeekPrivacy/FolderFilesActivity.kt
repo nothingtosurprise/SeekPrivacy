@@ -29,7 +29,7 @@ import java.io.InputStream
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import java.security.KeyStore
-import java.util.Base64
+import android.util.Base64
 import javax.crypto.Cipher
 import javax.crypto.CipherInputStream
 import javax.crypto.CipherOutputStream
@@ -163,7 +163,7 @@ searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.
         val survivalFile = getLastSurvivalFile()
         if (survivalFile.exists()) {
             val wrappedKeyBase64 = survivalFile.readText()
-            val wrappedKeyBytes = Base64.getDecoder().decode(wrappedKeyBase64)
+             val wrappedKeyBytes = Base64.decode(wrappedKeyBase64, Base64.NO_WRAP)
             return unwrapAESKey(wrappedKeyBytes)
         } else {
             val keyGen = KeyGenerator.getInstance("AES")
@@ -182,7 +182,7 @@ searchView.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.
     }
 
     private fun saveWrappedKey(wrappedKey: ByteArray) {
-        val base64 = Base64.getEncoder().encodeToString(wrappedKey)
+        val base64 = Base64.encodeToString(wrappedKey, Base64.NO_WRAP)
         listOf(File(encryptedDir, LAST_SURVIVAL_FILE), File(decryptedDir, LAST_SURVIVAL_FILE)).forEach {
             if (!it.parentFile.exists()) it.parentFile.mkdirs()
             it.writeText(base64)
