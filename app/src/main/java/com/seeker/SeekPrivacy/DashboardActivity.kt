@@ -426,7 +426,7 @@ private fun showSystemAuthForSetup(onSuccess: () -> Unit) {
         .setMessage("This is a manual, pre-emptive protocol. If you have not established your identity with the developer prior to losing access, a bypass token will not be issued.\n\n" +
         "To set this up, email the ID below. You will be asked specific security questions to verify your identity. If you request a bypass later, your answers and behavior must match this initial verification. If you cannot be identified with certainty, access will be denied.\n\n" +
         "ID: $deviceId")
-        .setCancelable(false)
+
         .setPositiveButton("Copy ID & Finish") { _, _ ->
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
             sharedPreferences.edit().putInt("setup_step", 4).apply()
@@ -434,11 +434,12 @@ private fun showSystemAuthForSetup(onSuccess: () -> Unit) {
             Toast.makeText(this, "Setup Complete", Toast.LENGTH_SHORT).show()
             checkPermissionsAtStartup()
         }
-        .setNegativeButton("Email Now") { _, _ ->
+        .setNeutralButton("Email Now") { _, _ ->
             sendBypassEmail(deviceId)
             checkPermissionsAtStartup()
         }
         .setNegativeButton("Cancel", null)
+        
         .show()
 }
 
@@ -605,7 +606,12 @@ private fun showSystemAuthForSetup(onSuccess: () -> Unit) {
 }
 
    private fun sendBypassEmail(deviceId: String) {
-    val email = "mytuta05@tutamail.com"
+   
+    val developerName = "Seeker"
+    val developerEmail = "mytuta05@tutamail.com"
+
+
+    val formattedEmail = "$developerName <$developerEmail>"
     val subject = android.net.Uri.encode("Developer Security Net Request")
     val body = "Device ID: $deviceId\n" +
                "Request Type: [REGISTRATION / RECOVERY]\n\n" +
@@ -613,7 +619,7 @@ private fun showSystemAuthForSetup(onSuccess: () -> Unit) {
                "Please ________ (initiate my security questions / provide my token)."
     
 
-    val uriString = "mailto:$email?subject=$subject&body=$body"
+    val uriString = "mailto:$formattedEmail?subject=$subject&body=$body"
     
     val intent = Intent(Intent.ACTION_SENDTO).apply {
         data = android.net.Uri.parse(uriString)
@@ -768,13 +774,18 @@ private fun showNewPasswordDialog() {
         }
         .setNegativeButton("Email Developer") { _, _ ->
     val subject = Uri.encode("Security Bypass Request")
+    val developerName = "Seeker"
+    val developerEmail = "mytuta05@tutamail.com"
+
+
+    val formattedEmail = "$developerName <$developerEmail>"
     val body = "Device ID: $deviceId\n" +
                "Request Type: [REGISTRATION / RECOVERY]\n\n" +
                "I am ________ (setting up / requesting a bypass). " +
                "Please ________ (initiate my security questions / provide my token)."
     
 
-    val uriString = "mailto:mytuta05@tutamail.com?subject=$subject&body=$body"
+    val uriString = "mailto:$formattedEmail?subject=$subject&body=$body"
     
     val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
         data = Uri.parse(uriString)
@@ -789,7 +800,7 @@ private fun showNewPasswordDialog() {
         .setNeutralButton("Enter Token") { _, _ -> 
             showTokenInputAndVerify() 
         }
-        .setNegativeButton("Cancel", null)
+        
         .show()
 }
 

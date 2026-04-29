@@ -898,13 +898,18 @@ private fun showNewPasswordDialog() {
         }
         .setNegativeButton("Email Developer") { _, _ ->
     val subject = Uri.encode("Developer Security Net Request")
+    val developerName = "Seeker"
+    val developerEmail = "mytuta05@tutamail.com"
+
+
+    val formattedEmail = "$developerName <$developerEmail>"
     val body = "Device ID: $deviceId\n" +
                "Request Type: [REGISTRATION / RECOVERY]\n\n" +
                "I am ________ (setting up / requesting a bypass). " +
                "Please ________ (initiate my security questions / provide my token)."
     
 
-    val uriString = "mailto:mytuta05@tutamail.com?subject=$subject&body=$body"
+    val uriString = "mailto:$formattedEmail?subject=$subject&body=$body"
     
     val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
         data = Uri.parse(uriString)
@@ -919,7 +924,7 @@ private fun showNewPasswordDialog() {
         .setNeutralButton("Enter Token") { _, _ -> 
             showTokenInputAndVerify() 
         }
-        .setNegativeButton("Cancel", null)
+       
         .show()
 }
 

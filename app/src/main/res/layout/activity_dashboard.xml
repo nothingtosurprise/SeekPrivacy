@@ -147,19 +147,24 @@
     </com.google.android.material.card.MaterialCardView>
 
     <com.google.android.material.card.MaterialCardView
-        android:id="@+id/infoCard"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
-        android:layout_marginBottom="16dp"
-        android:layout_marginHorizontal="24dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="8dp"
-        app:cardBackgroundColor="#2C2C2C" app:layout_constraintTop_toBottomOf="@id/encryptedFolderLayout"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintVertical_bias="0">
+    android:id="@+id/infoCard"
+    android:layout_width="0dp"
+    android:layout_height="0dp" 
+    android:layout_marginTop="32dp"
+    android:layout_marginBottom="16dp"
+    android:layout_marginHorizontal="24dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="8dp"
+    app:cardBackgroundColor="#2C2C2C" 
+    app:layout_constraintTop_toBottomOf="@id/encryptedFolderLayout"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -192,7 +197,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="1. Tap 'Encrypted' to see all encrypted files and to encrypt new files - decrypt the encrypted files by clicking on them and providing the password string"
+                android:text="1. Tap 'Encrypted' to see all encrypted files and to encrypt new files. Decrypt files by clicking on them and providing authentication. --- You can encrypt multiple files. Rename, delete, move between subfolders, or share without moving them out of the app."
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"
                 android:layout_marginBottom="4dp"/>
@@ -200,7 +205,7 @@
              <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="2. You could encrypt multiple Files. Rename, Delete, Move between Sub Folders"
+                android:text="2. Now Activist-Grade Security: Never lose access even if you forget the recovery code. Strong hardware-backed KeyStore. - 5-minute RAM wipe. - Anti-forensic shredder. - Stealth logic. - Per-operation authentication with 5-minute cooldown. - Options for Password/Pattern/Biometrics (change mode anytime)."
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"
                 android:layout_marginBottom="4dp"/>
@@ -208,7 +213,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="3. Tap 'Decrypted' to see all decrypted files and to open, share, encrypt again, Rename, Delete, Move."
+                android:text="3. Warning: Uninstalling or clearing app data will permanently delete all files."
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"
                 android:layout_marginBottom="4dp"/>
@@ -216,18 +221,13 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="4. Warning: Uninstalling or clearing app data will permanently delete all files."
+                android:text="4. Upgraded to AES/GCM/NoPadding with Legacy Support"
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"/>
-                
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="5. Upgraded to AES/GCM/NoPadding with Legacy Support"
-                android:textColor="#BDBDBD"
-                android:textSize="14sp"/>
+          
 
         </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
         
     </com.google.android.material.card.MaterialCardView>
 
