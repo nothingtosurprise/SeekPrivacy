@@ -1,7 +1,7 @@
 # 🛡️ Security Policy & Cryptographic Model [SECURITY-STABLE]
 
 ## 🏗️ Architectural Integrity (OWASP MASVS Aligned)
-SeekPrivacy v2.0 implements a "Zero-Trust" storage architecture designed to survive "All-Files Access" permission abuse and physical device seizure. This project follows high-standard security protocols to ensure activist-grade data protection.
+SeekPrivacy v3.0 implements a "Zero-Trust" storage architecture designed to survive "All-Files Access" permission abuse and physical device seizure. This project follows high-standard security protocols to ensure activist-grade data protection.
 
 ### 1. Supported Versions
 | Version | Supported          | Status             |
@@ -13,7 +13,7 @@ SeekPrivacy v2.0 implements a "Zero-Trust" storage architecture designed to surv
 ### 2. Cryptographic Implementation (TEE-Backed)
 * **Symmetric Encryption (GCM):** Uses `AES-256-GCM` (Galois/Counter Mode). Every file is encrypted with a unique 12-byte IV (Initialization Vector) to ensure authenticated integrity and prevent replay attacks.
 * **Asymmetric Key Wrapping (RSA-2048):** Master keys are wrapped using the **Android KeyStore System**. Private keys are non-exportable and reside within the hardware-backed **Trusted Execution Environment (TEE)**.
-* **RAM Hardening:** Sensitive `CharArrays` are explicitly zeroed out (`.fill('0')`) and nullified after use to prevent heap-dump leaks.
+* **RAM Hardening:** Sensitive `CharArrays` are explicitly zeroed out and nullified after use to prevent heap-dump leaks.
 
 
 **🚫 No Internet, No Leaks:** SeekPrivacy requests zero network permissions—total offline isolation means your data never leaves your device.
@@ -32,7 +32,7 @@ In high-stress activist environments, losing a password is a common point of fai
 Please do not report a **vulnerability** through public GitHub issues. 
 
 1. **Preferred Method:** Use the [GitHub Security Advisory](https://github.com/duckniii/SeekPrivacy/security/advisories/new) feature to report privately.
-2. **Alternative:** Email the developer at `[YOUR-EMAIL-HERE]` with the subject `[SECURITY-VULNERABILITY] SeekPrivacy`.
+2. **Alternative:** Email the developer at `mytuta05@tutamail.com` with the subject `[SECURITY-VULNERABILITY] SeekPrivacy`.
 
 ### How to Report:
 * **Description:** Detail the flaw and the specific security layer affected (e.g., GCM bypass, Shredding failure).

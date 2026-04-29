@@ -1,4 +1,4 @@
-# SeekPrivacy: Protect Data From Apps with Storage Access Permission
+# SeekPrivacy: Activist-Grade Isolation Against "All-Files Access" Surveillance
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/duckniii/SeekPrivacy/LICENSE)
 [![GitHub release](https://img.shields.io/github/v/release/duckniii/SeekPrivacy)](https://github.com/duckniii/SeekPrivacy/releases/latest)
@@ -81,12 +81,15 @@ SeekPrivacy is engineered for high-risk environments (journalism, activism, whis
 
 ### Screenshots
 
-![Screenshot 1: Dashboard](images/phoneScreenshots/1.png)
+![Screenshot 1: Dashboard](images/phoneScreenshots/s1.png)
+![Screenshot 2: Authentication Options](images/phoneScreenshots/s1-1.png)
+![Screenshot 3: Dev](images/phoneScreenshots/dev.png)
 ![Screenshot 2: Encrypted Folder - Encrypt Files](images/phoneScreenshots/2.png)
 ![Screenshot 3: Decrypt Files](images/phoneScreenshots/3.png)
 ![Screenshot 4: Decrypted Folder](images/phoneScreenshots/4.png)
 ![Screenshot 5: Open, Share, Decrypt Again](images/phoneScreenshots/5.png)
 ![Screenshot 6: Version2 Categorization n other features overview](images/phoneScreenshots/morefeatures-v2.png)
+![Screenshot 7: Pattern](images/phoneScreenshots/pattern.png)
 
 
 ## Logo and Branding

@@ -1,1 +1,1 @@
-Protect private files from apps with "All Files Access" - no trade-offs needed.
+Hardware-hardened file isolation to defeat "All Files Access" surveillance.

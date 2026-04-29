@@ -18,7 +18,7 @@ android {
         applicationId "com.seeker.seekprivacy"
         minSdkVersion 21
         targetSdkVersion 32
-        versionCode 4
+        versionCode 5
         versionName "3.0"
     }
 
