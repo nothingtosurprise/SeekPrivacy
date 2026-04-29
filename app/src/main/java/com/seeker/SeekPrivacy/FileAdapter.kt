@@ -6,9 +6,9 @@ import android.view.ViewGroup
 import android.webkit.MimeTypeMap
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
+import com.bumptech.glide.Glide
 
 class FileAdapter(private var fileList: List<File>, private val onItemClick: (File) -> Unit) :
     RecyclerView.Adapter<FileAdapter.FileViewHolder>() {
@@ -24,8 +24,11 @@ class FileAdapter(private var fileList: List<File>, private val onItemClick: (Fi
     }
 
     override fun onBindViewHolder(holder: FileViewHolder, position: Int) {
-    var file = fileList[position]
+    val file = fileList[position]
     holder.fileNameTextView.text = file.name
+
+
+    Glide.with(holder.itemView.context).clear(holder.fileIcon)
 
     when {
         file.isDirectory -> {
@@ -35,21 +38,36 @@ class FileAdapter(private var fileList: List<File>, private val onItemClick: (Fi
             holder.fileIcon.setImageResource(R.drawable.ic_lock)
         }
         else -> {
+    val path = file.absolutePath
+    val extension = file.extension.lowercase()
+    val isSupported = extension in listOf("jpg", "jpeg", "png", "webp")
 
-            // for .jpg, .pdf, .mp4, etc. 
-            // For now, the default file icon is perfect.
-            holder.fileIcon.setImageResource(R.drawable.ic_file)
-        }
+    if (isSupported) {
+        Glide.with(holder.itemView.context)
+            .asBitmap() 
+            .load(path) 
+            .override(200, 200)
+            .centerCrop()
+            
+            .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.NONE)
+            .skipMemoryCache(true)
+            .placeholder(R.drawable.ic_file)
+            .error(R.drawable.ic_file)
+            .into(holder.fileIcon)
+    } else {
+        holder.fileIcon.setImageResource(R.drawable.ic_file)
+    }
+}
     }
 
     holder.itemView.setOnClickListener { onItemClick(file) }
 }
 
     override fun getItemCount(): Int = fileList.size
-    
-    fun updateData(newList: List<File>) {
-    this.fileList = newList // Replace the old list with the filtered one
-    notifyDataSetChanged()  // Tellz the UI to redraw the list immediately
-}
-}
 
+    fun updateData(newList: List<File>) {
+
+        this.fileList = newList
+        notifyDataSetChanged()
+    }
+}

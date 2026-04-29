@@ -30,6 +30,8 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
+            
+            
 
             <TextView
                 android:id="@+id/appNameAndCreator"
@@ -63,7 +65,7 @@
                 android:id="@+id/contactUsBelow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="For any issues, please reach me at: duh-filth-obscure@duck.com"
+                android:text="For any issues, please reach me at: mytuta05@tutamail.com"
                 android:textColor="#2196F3"
                 android:textSize="14sp"
                 android:textStyle="bold"
@@ -164,6 +166,19 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
+            
+            
+            
+            <com.google.android.material.button.MaterialButton
+    android:id="@+id/btnDeveloperSetup"
+    style="@style/Widget.MaterialComponents.Button.TextButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="12dp"
+    android:layout_gravity="end"
+    android:text="Set Developer"
+    android:textColor="#FF9800"
+    app:rippleColor="#4DFF9800" />
 
             <TextView
                 android:layout_width="wrap_content"
@@ -208,7 +223,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="5. AES/CBC/PKCS5Padding Used"
+                android:text="5. Upgraded to AES/GCM/NoPadding with Legacy Support"
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"/>
 
