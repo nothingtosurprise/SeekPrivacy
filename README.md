@@ -11,11 +11,11 @@
 
 
 
-[**Download SeekPrivacy v3.0 APK from Github**](https://github.com/duckniii/SeekPrivacy/releases/download/v3.0/app-release-3-0.apk)
+[**Download SeekPrivacy v3.0 APK from Github**](https://github.com/duckniii/SeekPrivacy/releases/download/v3.0/seekprivacy-3.0.apk)
 
-[**OR Download SeekPrivacy from AndroidFreeWare**](https://www.androidfreeware.net/download-seekprivacy-apk.html)
+[**OR Download SeekPrivacy v2 from AndroidFreeWare**](https://www.androidfreeware.net/download-seekprivacy-apk.html)
 
-[**OR Download SeekPrivacy From OpenApk**](https://www.openapk.net/seekprivacy/com.seeker.seekprivacy/)
+[**OR Download SeekPrivacy v2 From OpenApk**](https://www.openapk.net/seekprivacy/com.seeker.seekprivacy/)
 
 [**OR on Fdroid using Izzysoft Repo**](https://apt.izzysoft.de/packages/com.seeker.seekprivacy)
 
