@@ -4,4 +4,3 @@ v3.0.0 - Activist-Grade Security Update
 - NEW: Hardware-backed KeyStore integration and 5-minute RAM wipe.
 - NEW: Strong Authentication (Password, Pattern, Biometrics) with 5-minute cooldowns.
 - NEW: Developer Recovery System for hardware-anchored data rescue.
-- COMPATIBILITY: Full support for Android 5.0 through Android 13+ and v2.x backward compatibility.
