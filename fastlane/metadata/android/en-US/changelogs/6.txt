@@ -1,0 +1,5 @@
+v3.0.1 - Bug Fix for Activist-Grade Security Update
+ - Restored V2 file handling functionality.
+ - Fixed hidden file visibility issue in subfolders.
+ - Fixed "File Displacement" bug: Encrypted/Decrypted files now remain in their respective subfolders instead of jumping to root.
+  

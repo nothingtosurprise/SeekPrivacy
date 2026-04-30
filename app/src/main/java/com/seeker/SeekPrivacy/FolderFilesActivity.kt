@@ -530,57 +530,65 @@ private fun unwrapAESKey(wrappedKey: ByteArray): SecretKey {
     }
 }
 
-    private fun loadFileList() {
-    searchView.setQuery("", false)
-    searchView.clearFocus()
+   private fun loadFileList() {
 
     lifecycleScope.launch(Dispatchers.IO) {
         if (!currentDir.exists()) currentDir.mkdirs()
-        
+
 
         val primaryFiles = currentDir.listFiles()?.toList() ?: emptyList()
 
 
-        val isAtRoot = (currentDir.absolutePath == rootDir.absolutePath)
-        
-
-        val extraFiles = if (isAtRoot) {
-            val internalRoot = File(filesDir, if (isEncryptedFolder) "Encrypted" else "Decrypted")
-            val externalRoot = if (isEncryptedFolder) encryptedDir else decryptedDir
-            
-
-            val mirrorDir = if (currentDir.absolutePath == internalRoot.absolutePath) externalRoot else internalRoot
-            
-            if (mirrorDir.exists()) mirrorDir.listFiles()?.toList() else null
+        val isInInternal = currentDir.absolutePath.startsWith(internalRootDir.absolutePath)
+        val relativePath = if (isInInternal) {
+            currentDir.absolutePath.removePrefix(internalRootDir.absolutePath)
         } else {
-            null 
-        } ?: emptyList()
+            currentDir.absolutePath.removePrefix(rootDir.absolutePath)
+        }
+
+        val targetMirrorRoot = if (isInInternal) rootDir else internalRootDir
+        val mirrorDir = File(targetMirrorRoot, relativePath)
+
+        val extraFiles = if (mirrorDir.exists()) {
+            mirrorDir.listFiles()?.toList() ?: emptyList()
+        } else {
+            emptyList()
+        }
 
 
         val allFiles = (primaryFiles + extraFiles)
-            .filter { it.name != ".nomedia" && !it.name.startsWith(".") }
+            .filter { it.name != FILE_VS_FILE && it.name != ".nomedia" && !it.name.startsWith(".") }
             .distinctBy { it.name } 
+
 
         val sortedList = allFiles.sortedWith(compareBy({ !it.isDirectory }, { it.name.lowercase() }))
 
         withContext(Dispatchers.Main) {
 
-            toolbar.title = if (isAtRoot) {
-                if (isEncryptedFolder) "Encrypted Vault" else "Decrypted Files"
-            } else {
-                currentDir.name 
-            }
+            allFilesMasterList = sortedList 
 
 
-            allFilesMasterList = sortedList.toMutableList()
+            countTextView.text = "${sortedList.size} Files"
+
+
             encryptedFiles.clear()
             encryptedFiles.addAll(sortedList)
+            fileAdapter.notifyDataSetChanged()
+
+
+            toolbar.subtitle = if (relativePath.isEmpty()) "Root" else relativePath
             
-            fileAdapter.updateData(sortedList)
-            countTextView.text = "${sortedList.size} Items"
+
+            val currentQuery = searchView.query.toString()
+            if (currentQuery.isNotEmpty()) {
+                filterFiles(currentQuery)
+            }
         }
     }
 }
+
+
+
     private fun openFilePicker() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
@@ -591,26 +599,32 @@ private fun unwrapAESKey(wrappedKey: ByteArray): SecretKey {
     }
 
     private suspend fun encryptFileUri(uri: Uri, isBatch: Boolean = false) {
-        
-        try {
-            withContext(Dispatchers.IO) {
-                val inputStream = contentResolver.openInputStream(uri) ?: return@withContext
-                val fileName = queryFileName(uri) ?: "file_${System.currentTimeMillis()}"
-                val fileSize = contentResolver.openAssetFileDescriptor(uri, "r")?.length ?: 0
-                
+    try {
+        withContext(Dispatchers.IO) {
+            val inputStream = contentResolver.openInputStream(uri) ?: return@withContext
+            val fileName = queryFileName(uri) ?: "file_${System.currentTimeMillis()}"
+            val fileSize = contentResolver.openAssetFileDescriptor(uri, "r")?.length ?: 0
 
-                val outputFile = getTargetFile("$fileName.enc", fileSize)
-                
-                encryptFile(inputStream, outputFile)
-                deleteExternalFile(uri)
+            
+            val relativePath = if (currentDir.absolutePath.startsWith(internalEncDir.absolutePath)) {
+                currentDir.absolutePath.removePrefix(internalEncDir.absolutePath)
+            } else {
+                currentDir.absolutePath.removePrefix(encryptedDir.absolutePath)
             }
-            if (!isBatch) loadFileList()
-        } catch (e: Exception) {
-            withContext(Dispatchers.Main) {
-                Toast.makeText(this@FolderFilesActivity, "Encryption failed: ${e.message}", Toast.LENGTH_LONG).show()
-            }
+
+
+            val outputFile = getTargetFile("$fileName.enc", fileSize, relativePath)
+            
+            encryptFile(inputStream, outputFile)
+            deleteExternalFile(uri)
+        }
+        if (!isBatch) loadFileList()
+    } catch (e: Exception) {
+        withContext(Dispatchers.Main) {
+            Toast.makeText(this@FolderFilesActivity, "Encryption failed: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
+}
 
     private suspend fun decryptFileUri(uri: Uri, isBatch: Boolean = false) {
         withContext(Dispatchers.IO) {
@@ -1028,12 +1042,20 @@ private fun showNewPasswordDialog() {
 
 
 
-    private fun getTargetFile(fileName: String, fileSize: Long): File {
-        val limit = 50 * 1024 * 1024
-        val root = if (fileSize > limit) encryptedDir else File(filesDir, "Encrypted")
-        if (!root.exists()) root.mkdirs()
-        return File(root, fileName)
-    }
+    private fun getTargetFile(fileName: String, fileSize: Long, subPath: String): File {
+    val limit = 50 * 1024 * 1024 
+    
+
+    val baseRoot = if (fileSize > limit) encryptedDir else internalEncDir
+    
+
+    val targetFolder = File(baseRoot, subPath)
+    
+
+    if (!targetFolder.exists()) targetFolder.mkdirs()
+    
+    return File(targetFolder, fileName)
+}
 
     private fun showLoadingDialog(message: String) {
         val progressView = layoutInflater.inflate(R.layout.dialog_loading, null)
@@ -1276,10 +1298,22 @@ private fun performDecryption(file: File) {
   private fun promptEncryptFile(file: File) {
     val newName = if (file.name.endsWith(".enc")) file.name else "${file.name}.enc"
     showLoadingDialog("Encrypting...")
+    
     lifecycleScope.launch {
         withContext(Dispatchers.IO) {
+            // 1. Calculate the relative path of where you are right now
+            val relativePath = if (currentDir.absolutePath.startsWith(internalEncDir.absolutePath)) {
+                currentDir.absolutePath.removePrefix(internalEncDir.absolutePath)
+            } else if (currentDir.absolutePath.startsWith(encryptedDir.absolutePath)) {
+                currentDir.absolutePath.removePrefix(encryptedDir.absolutePath)
+            } else {
+                // If it's coming from outside the vault (Decrypted folder), 
+                // we treat it as root or maintain its current subfolder structure
+                "" 
+            }
 
-            val targetFile = getTargetFile(newName, file.length())
+            // 2. Pass the relativePath as the third argument
+            val targetFile = getTargetFile(newName, file.length(), relativePath)
             
             encryptFile(FileInputStream(file), targetFile)
             secureDelete(file)
