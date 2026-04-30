@@ -11,7 +11,7 @@
 
 
 
-[**Download SeekPrivacy v3.0 APK from Github**](https://github.com/duckniii/SeekPrivacy/releases/download/v3.0/seekprivacy-3.0.apk)
+[**Download SeekPrivacy v3.0.1 APK from Github**](https://github.com/duckniii/SeekPrivacy/releases/download/v3.0.1/seekprivacy-v3.0.1-release.apk)
 
 [**OR Download SeekPrivacy v2 from AndroidFreeWare**](https://www.androidfreeware.net/download-seekprivacy-apk.html)
 
