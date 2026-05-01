@@ -1,6 +1,6 @@
-# SeekPrivacy: Activist-Grade Isolation Against "All-Files Access" Surveillance
+# SeekPrivacy: Activist-Grade Isolation Against "File Access" Surveillance
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/duckniii/SeekPrivacy/LICENSE)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://github.com/duckniii/SeekPrivacy/LICENSE)
 [![GitHub release](https://img.shields.io/github/v/release/duckniii/SeekPrivacy)](https://github.com/duckniii/SeekPrivacy/releases/latest)
 [![Made with Kotlin](https://img.shields.io/badge/Kotlin-Made%20with-blue.svg)](https://kotlinlang.org/)
 [![Security: OWASP MASVS L2](https://img.shields.io/badge/Security-OWASP%20MASVS%20L2-gold.svg)](#-architectural-integrity)
@@ -11,15 +11,16 @@
 
 
 
-[**Download SeekPrivacy v3.0.1 APK from Github**](https://github.com/duckniii/SeekPrivacy/releases/download/v3.0.1/seekprivacy-v3.0.1-release.apk)
+| Source | Status |
+|--------|--------|
+| **Github Releases** | [![GitHub release](https://img.shields.io/github/v/release/duckniii/SeekPrivacy?label=Latest)](https://github.com/duckniii/SeekPrivacy/releases/download/v3.0.1/seekprivacy-v3.0.1-release.apk) |
+| **IzzyOnDroid** | [![IzzyOnDroid](https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/com.seeker.seekprivacy)](https://apt.izzysoft.de/packages/com.seeker.seekprivacy) |
+| **Android Freeware** | [![Android Freeware](https://img.shields.io/badge/Download-Android%20Freeware-blue?logo=android)](https://www.androidfreeware.net/download-seekprivacy-apk.html) |
+| **OpenAPK** | [![OpenAPK](https://img.shields.io/badge/Download-OpenAPK-orange?logo=android)](https://www.openapk.net/seekprivacy/com.seeker.seekprivacy/) |
+| **Appteka** | [![Appteka](https://img.shields.io/badge/Download-Appteka-red?logo=android)](https://appteka.store/app/a54r258544) |
 
-[**OR Download SeekPrivacy v2 from AndroidFreeWare**](https://www.androidfreeware.net/download-seekprivacy-apk.html)
 
-[**OR Download SeekPrivacy v2 From OpenApk**](https://www.openapk.net/seekprivacy/com.seeker.seekprivacy/)
 
-[**OR on Fdroid using Izzysoft Repo**](https://apt.izzysoft.de/packages/com.seeker.seekprivacy)
-
----
 
 ## 🛡️ The "No-Trade-Off" Revolution
 Standard vaults create a clunky "island." **SeekPrivacy** creates a shield. Apps like social media and photo editors demand "All Files Access"—if you refuse, they break. If you accept, they spy.  This creates a painful **trade-off** between **functionality** and **privacy**.
@@ -35,35 +36,38 @@ SeekPrivacy is built for the human element. Our **Secure Dev Last Resort** is a 
 We eliminate the catastrophic tension of permanent lockouts. This system ensures that even if your memory falters under interrogation or duress, your life's work remains accessible through a verified, hardware-bound recovery path.
 
 ---
+
 **🛡️ HARDENED | 🚫 OFFLINE | ✊ ACTIVIST-GRADE**
 
 ---
 
 ### 🛠️ Professional Management Suite (V2.0+)
 We’ve integrated a full-featured management layer directly into the encrypted state. No more "decrypt-to-organize."
-* **🗂️ Nested Sub-Folders:** Total categorization within the vault.
-* **🔍 Instant search:** Find any encrypted file across internal/external mirrors in milliseconds.
-* **✍️ Hot-Rename & Move:** Modify file names and locations without breaking encryption.
-* **⚡ Zero-Freeze Engine:** Completely rebuilt I/O logic. Heavy encryption (1GB+) now runs in the background without freezing the UI.
-* **📊 Live Count:** Real-time visibility into your vault’s volume.
+* **Nested Sub-Folders:** Total categorization within the vault.
+* **Instant search:** Find any encrypted file across internal/external mirrors in milliseconds.
+* **Hot-Rename & Move:** Modify file names and locations without breaking encryption.
+* **Zero-Freeze Engine:** Completely rebuilt I/O logic. Heavy encryption (1GB+) now runs in the background without freezing the UI.
+* **Live Count:** Real-time visibility into your vault’s volume.
 
-### ✊ Activist-Grade Security Features
-* **🔐 Hardware-Backed KeyStore:** Uses RSA-2048/AES-256 GCM. The keys stay in the hardware, not the software.
-* **⏱️ 5-Minute RAM Wipe:** Sensitive key material is nullified automatically on idle to prevent memory-dump attacks.
-* **🪓 Anti-Forensic Shredder:** Deletion doesn't just "unlink" files. SeekPrivacy overwrites file headers and the first 1MB with cryptographic random noise (SecureRandom). This creates high-entropy data residue that camouflages deleted files, defeating forensic recovery tools (like Cellebrite) that look for standard "zero-filled" wiped blocks.
-* **🛡️ Stealth Logic:** Screen-recording, screenshots, and "Recent Apps" snapshots are hardware-blocked (`FLAG_SECURE`).
-* **🛠️ Developer Bypass UI 🆘 Zero-Tension Recovery:** A world-first recovery system using a hardware-anchored `ANDROID_ID` for secure, encrypted bypass token requests. Never fear losing your data due to a forgotten password. Our Secure Dev Last Resort provides a world-first recovery bridge, giving you the peace of mind that your life's work is never permanently locked away.
+### Activist-Grade Security Features
+* **Hardware-Backed KeyStore:** Uses RSA-2048/AES-256 GCM. The keys stay in the hardware, not the software.
+* **5-Minute RAM Wipe:** Sensitive key material is nullified automatically on idle to prevent memory-dump attacks.
+* **Anti-Forensic Shredder:** Deletion doesn't just "unlink" files. SeekPrivacy overwrites file headers and the first 1MB with cryptographic random noise (SecureRandom). This creates high-entropy data residue that camouflages deleted files, defeating forensic recovery tools (like Cellebrite) that look for standard "zero-filled" wiped blocks.
+* **Stealth Logic:** Screen-recording, screenshots, and "Recent Apps" snapshots are hardware-blocked (`FLAG_SECURE`).
+* **Developer Bypass UI Zero-Tension Recovery:** A world-first recovery system using a hardware-anchored `ANDROID_ID` for secure, encrypted bypass token requests. Never fear losing your data due to a forgotten password. Our Secure Dev Last Resort provides a world-first recovery bridge, giving you the peace of mind that your life's work is never permanently locked away.
 * **🚫 No Internet, No Leaks:** SeekPrivacy requests zero network permissions—total offline isolation means your data never leaves your device.
 
----
 
-## 🛠 Security Protocol
+
+## Security Protocol
 - **Cipher:** AES-256-GCM (Authenticated Encryption)
 - **Key Management:** RSA-2048 (Hardware-Backed Android KeyStore)
 - **Anti-Mirroring:** Hardware-level `FLAG_SECURE` blocks screenshots and screen recording.
 
 
-## 🛡️ Activist Threat Model & Defense Scenarios
+
+
+## Activist Threat Model & Defense Scenarios
 
 SeekPrivacy is engineered for high-risk environments (journalism, activism, whistleblowing) where device seizure or forced surveillance is a primary threat.
 
@@ -76,6 +80,49 @@ SeekPrivacy is engineered for high-risk environments (journalism, activism, whis
 | **Forensic Memory Dump** | Attacker attempts to pull encryption keys from the device's RAM. | **Zero-Persistence Logic:** Sensitive `CharArrays` are explicitly filled with `0x00` after use. Keys are wrapped in the Hardware-Backed KeyStore (TEE) and are non-exportable. |
 | **Lost Credentials** | High-stress environments and trauma cause you to forget your complex pattern or password. | **Secure Dev Last Resort:** Eliminates the catastrophic tension of permanent data loss. Without this, losing your password means your evidence or life's work is gone forever. This world-first recovery bridge uses your unique hardware `ANDROID_ID` to grant a secure, transparent bypass, ensuring you never lose access to your data when you need it most. |
 
+
+
+
+
+## Building from Source
+
+To build the APK on your local machine, follow these instructions.
+
+### Prerequisites
+* **JDK 17**: Ensure you have OpenJDK 17 installed and active.
+* **Android SDK**: You need the Android SDK platforms and Build-Tools installed (available via Android Studio).
+* **Gradle**: This project uses the included Gradle Wrapper (no separate installation required).
+
+### Setup and Build
+
+1. **Clone the repository:**
+   
+```bash
+   git clone [https://github.com/duckniii/SeekPrivacy.git](https://github.com/duckniii/SeekPrivacy.git)
+   cd SeekPrivacy
+```
+
+2. **Check Java Version:**
+*Verify you are using the correct version by running:*
+
+```bash
+  java -version
+```
+*It should report version 17.*
+
+3. **Run the Build:**
+   Execute the following command in the project root:
+
+   **On Linux or macOS:**
+   ```bash
+   ./gradlew assembleRelease
+   ```
+   **On Windows (Command Prompt or PowerShell):**
+   ```bash
+   gradlew.bat assembleRelease
+   ```
+
+---
 
 ### Screenshots
 
