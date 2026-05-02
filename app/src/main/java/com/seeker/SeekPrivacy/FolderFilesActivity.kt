@@ -1121,33 +1121,69 @@ private fun showNewPasswordDialog() {
     private fun showFileOptionsDialog(file: File) {
 
     val options = if (isEncryptedFolder) {
-        arrayOf("Decrypt", "Rename", "Delete", "Move to Folder")
-    } else {
-        arrayOf("Open", "Encrypt Again", "Share", "Rename", "Delete", "Move to folder")
-    }
+    arrayOf("Decrypt", "Rename", "Delete", "Move to Folder", "Properties")
+} else {
+    arrayOf("Open", "Encrypt Again", "Share", "Rename", "Delete", "Move to folder", "Properties")
+}
 
-    AlertDialog.Builder(this)
-        .setTitle(file.name)
-        .setItems(options) { _, which ->
-            if (isEncryptedFolder) {
-                when (which) {
-                    0 -> promptDecryptFile(file)
-                    1 -> showRenameDialog(file)
-                    2 -> { confirmDeletion(file); loadFileList() }
-                    3 -> showMoveDialog(file)
-                }
-            } else {
-                when (which) {
-                    0 -> openFileWithProvider(file)
-                    1 -> promptEncryptFile(file)
-                    2 -> shareFile(file)
-                    3 -> showRenameDialog(file)
-                    4 -> { confirmDeletion(file); loadFileList() }
-                    5 -> showMoveDialog(file)
-                }
+AlertDialog.Builder(this)
+    .setTitle(file.name)
+    .setItems(options) { _, which ->
+        if (isEncryptedFolder) {
+            when (which) {
+                0 -> promptDecryptFile(file)
+                1 -> showRenameDialog(file)
+                2 -> { confirmDeletion(file); loadFileList() }
+                3 -> showMoveDialog(file)
+                4 -> showFileProperties(file) // New Property Option
+            }
+        } else {
+            when (which) {
+                0 -> openFileWithProvider(file)
+                1 -> promptEncryptFile(file)
+                2 -> shareFile(file)
+                3 -> showRenameDialog(file)
+                4 -> { confirmDeletion(file); loadFileList() }
+                5 -> showMoveDialog(file)
+                6 -> showFileProperties(file) // New Property Option
             }
         }
+    }
+    .show()
+}
+
+  private fun showFileProperties(file: File) {
+    val size = formatSize(file.length())
+    val lastModified = formatDate(file.lastModified())
+    val name = file.name
+    val extension = file.extension.uppercase()
+
+    val info = """
+        Name: $name
+        Type: $extension File
+        Size: $size
+        Modified: $lastModified
+        Path: ${file.parent}
+    """.trimIndent()
+
+    AlertDialog.Builder(this)
+        .setTitle("File Properties")
+        .setMessage(info)
+        .setPositiveButton("OK", null)
         .show()
+}
+
+// Helpers to make the data look nice
+private fun formatSize(bytes: Long): String {
+    if (bytes < 1024) return "$bytes B"
+    val exp = (Math.log(bytes.toDouble()) / Math.log(1024.0)).toInt()
+    val pre = "KMGTPE"[exp - 1]
+    return String.format("%.1f %sB", bytes / Math.pow(1024.0, exp.toDouble()), pre)
+}
+
+private fun formatDate(timestamp: Long): String {
+    val sdf = java.text.SimpleDateFormat("MMM dd, yyyy HH:mm", java.util.Locale.getDefault())
+    return sdf.format(java.util.Date(timestamp))
 }
 
     
@@ -1307,12 +1343,11 @@ private fun performDecryption(file: File) {
             } else if (currentDir.absolutePath.startsWith(encryptedDir.absolutePath)) {
                 currentDir.absolutePath.removePrefix(encryptedDir.absolutePath)
             } else {
-                // If it's coming from outside the vault (Decrypted folder), 
-                // we treat it as root or maintain its current subfolder structure
+              
                 "" 
             }
 
-            // 2. Pass the relativePath as the third argument
+
             val targetFile = getTargetFile(newName, file.length(), relativePath)
             
             encryptFile(FileInputStream(file), targetFile)
