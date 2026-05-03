@@ -1,1 +1,1 @@
-Hardware-hardened file isolation to defeat "All Files Access" surveillance.
+Activist-Grade Defense Against System-Level Data Surveillance.
