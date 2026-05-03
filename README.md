@@ -1,4 +1,4 @@
-# SeekPrivacy: Activist-Grade Isolation Against "File Access" Surveillance
+# SeekPrivacy: Activist-Grade Defense Against System-Level Data Surveillance.
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://github.com/duckniii/SeekPrivacy/LICENSE)
 [![GitHub release](https://img.shields.io/github/v/release/duckniii/SeekPrivacy)](https://github.com/duckniii/SeekPrivacy/releases/latest)
@@ -23,19 +23,33 @@
 
 
 ## 🛡️ The "No-Trade-Off" Revolution
-Standard vaults create a clunky "island." **SeekPrivacy** creates a shield. Apps like social media and photo editors demand "All Files Access"—if you refuse, they break. If you accept, they spy.  This creates a painful **trade-off** between **functionality** and **privacy**.
+Standard vaults create a clunky "island." **SeekPrivacy** creates a shield. Apps like social media and basic tools demand "Storage Access"—if you refuse, they break. If you accept, they **spy**.  This creates a painful **trade-off** between **functionality** and **privacy**.
 
-It provides multi-layered defense by isolating data within encrypted sandbox, inaccessible to other apps, the OS, or unauthorized physical extraction - providing activist grade security with file management - With the Belief "Privacy Without the Tradeoff of Ease" 
 
-**SeekPrivacy eliminates this blackmail.** It provides **multi-layered** defense by isolating data within encrypted sandbox, inaccessible to **other apps**, the **OS**, or **unauthorized physical extraction** - providing activist grade security - With the Belief "Privacy Without the Tradeoff of Ease"  - even if a malicious app has full device control, it sees **nothing**.
+## The SeekPrivacy Shield
+
+SeekPrivacy is built on the principle that your phone's operating system and other apps should be considered **"hostile territory."** It assume the **Android OS is compromised and every other app is a potential spy**. It's architecture ensures that even if a malicious app gains full control of the device, your data remains a cryptographic black box.
+
+
+**SeekPrivacy eliminates this blackmail.** It provides **multi-layered** defense by isolating data within encrypted sandbox, inaccessible to **other apps**, the **OS**, or **unauthorized physical extraction** - providing **activist grade security** - With the Belief **"Privacy Without the Tradeoff of Ease"**  - even if a malicious app has full device control, it sees **nothing**.
+
+
+
+### Digital Isolation (Protection from System & Apps)
+
+*   **Hardware-Anchored Storage:** Files are encrypted with `AES-256-GCM` and stored within the app's internal directory. Other apps have no way to even detect the existence of this data, let alone access it. Even in the event of a system-level breach or Root access, the data inside `Encrypted Folder` remains an unreadable encrypted blob that cannot be decrypted without the hardware-bound key.
+*   **Hardware-Level Privacy:** By utilizing `FLAG_SECURE`, it block screen-scraping, remote mirroring, and screenshots of your file lists at the hardware level. This defeats spyware attempting to monitor your filenames or activity.
+*   **Zero-Persistence RAM:** It don't just "close" keys; it zero them out. Sensitive `CharArrays` are explicitly overwritten with `0x00` in memory, and master keys are wrapped in the **Hardware-Backed KeyStore (TEE)**, making them physically non-exportable.
+
+
 
 ## ✊ The Activist Grade: "Trauma-Resilient" Defense
-In high-risk environments, the greatest threat isn't just a remote hacker—it's **Physiological Stress**. When a device is seized or a user is detained, acute trauma causes cognitive blockages. In traditional FOSS vaults, forgetting your pattern means your evidence, your contacts, and your protection are effectively dead.
+In high-risk environments, the greatest threat isn't just a remote hacker—it's **Physiological Stress**. When a device is seized or a user is detained, acute trauma causes cognitive blockages. In traditional vaults, forgetting your pattern means your evidence, your contacts, and your protection are effectively dead.
 
 ### Secure Dev Last Resort
-SeekPrivacy is built for the human element. Our **Secure Dev Last Resort** is a world-first recovery bridge. By anchoring recovery to the non-exportable `ANDROID_ID` within the device’s physical **Trusted Execution Environment (TEE)** chip, we provide a secure "Extraction Point" for your data.
+SeekPrivacy is built for the human element. **Secure Dev Last Resort** is a world-first recovery bridge. By anchoring recovery to the non-exportable `ANDROID_ID` within the device’s physical **Trusted Execution Environment (TEE)** chip, it provide a secure "Extraction Point" for your data.
 
-We eliminate the catastrophic tension of permanent lockouts. This system ensures that even if your memory falters under interrogation or duress, your life's work remains accessible through a verified, hardware-bound recovery path.
+It eliminate the catastrophic tension of permanent lockouts. This system ensures that even if your memory falters under interrogation or duress, your life's work remains accessible through a verified, hardware-bound recovery path.
 
 ---
 
@@ -44,11 +58,10 @@ We eliminate the catastrophic tension of permanent lockouts. This system ensures
 ---
 
 ### 🛠️ Professional Management Suite (V2.0+)
-We’ve integrated a full-featured management layer directly into the encrypted state. No more "decrypt-to-organize."
+It's integrated with a full-featured management layer directly into the encrypted state. No more "decrypt-to-organize."
 * **Nested Sub-Folders:** Total categorization within the vault.
 * **Instant search:** Find any encrypted file across internal/external mirrors in milliseconds.
 * **Hot-Rename & Move:** Modify file names and locations without breaking encryption.
-* **Zero-Freeze Engine:** Completely rebuilt I/O logic. Heavy encryption (1GB+) now runs in the background without freezing the UI.
 * **Live Count:** Real-time visibility into your vault’s volume.
 
 ### Activist-Grade Security Features
@@ -71,17 +84,16 @@ We’ve integrated a full-featured management layer directly into the encrypted 
 
 ## Activist Threat Model & Defense Scenarios
 
-SeekPrivacy is engineered for high-risk environments (journalism, activism, whistleblowing) where device seizure or forced surveillance is a primary threat.
+Forensic & Forced Protection (Protection from Physical Threats)
+While the core mission is to neutralize digital surveillance from a compromised OS or spying apps, the defense does not stop at the screen. SeekPrivacy is engineered to bridge the gap between digital security and physical reality. When the threat shifts from a background process to a physical encounter—such as a checkpoint seizure or a forced handover—the app activates high-defense protocols designed to survive forensic extraction and human duress.
+
+When device seizure or a forced handover is imminent, SeekPrivacy shifts into high-defense mode:
 
 | Scenario | Attack Vector | SeekPrivacy Shield |
 | :--- | :--- | :--- |
-| **Physical Seizure** | An adversary gains physical access to your device. | **Anti-Forensic Shredding:** Deletion triggers a `RandomAccessFile` wipe of the first 1MB (headers + data), defeating tools like Cellebrite that "undelete" file signatures. |
-| **Forced Handover** | You are forced to unlock your phone under duress. | **RAM-Zeroing Watchdog:** Inactivity or backgrounding the app triggers an immediate `SecretKey` nullification. Even if the phone is unlocked, the vault remains a "Black Box" until your specific pattern/pass is re-entered. |
-| **All-Files Malware** | A "required" government or social app scans your storage for documents. | **Cryptographic Cloaking:** Files are encrypted with `AES-256-GCM` and metadata is stripped. To a scanning app, your private files appear as corrupted system blobs or are completely invisible to the OS index. |
-| **Screen Surveillance** | Spyware or "Safety" apps record your screen to steal passwords/file lists. | **Hardware Block (`FLAG_SECURE`):** The Android Window Manager is instructed to block all screen-scraping, screenshots, and remote mirroring at the hardware level. |
-| **Forensic Memory Dump** | Attacker attempts to pull encryption keys from the device's RAM. | **Zero-Persistence Logic:** Sensitive `CharArrays` are explicitly filled with `0x00` after use. Keys are wrapped in the Hardware-Backed KeyStore (TEE) and are non-exportable. |
-| **Lost Credentials** | High-stress environments and trauma cause you to forget your complex pattern or password. | **Secure Dev Last Resort:** Eliminates the catastrophic tension of permanent data loss. Without this, losing your password means your evidence or life's work is gone forever. This world-first recovery bridge uses your unique hardware `ANDROID_ID` to grant a secure, transparent bypass, ensuring you never lose access to your data when you need it most. |
-
+| **Physical Seizure** | Adversary uses forensic hardware (Cellebrite) to "carve" and recover deleted original files. | **Anti-Forensic Shredding:** When importing or deleting, the app triggers a `RandomAccessFile` wipe of the original file. The first **1MB** is overwritten with random noise, destroying the file headers and metadata before the system deletes it. This makes forensic reconstruction of the original data mathematically impossible. |
+| **Forced Handover** | You are forced to unlock your device under duress or via compromised OS "bypass" attempts. | **Hardware-Locked Vault:** Access is anchored to the hardware TEE. The master key remains wrapped inside the secure element; without the specific gateway (pattern/pass), the hardware refuses to release the key, even if the OS is compromised or the phone is "unlocked." |
+| **Lost Credentials** | High-stress trauma causes you to forget your complex password. | **Secure Developer Bridge:** A world-first recovery protocol. Using your unique `ANDROID_ID` as a hardware anchor, it provides a secure bypass that prevents the permanent loss of life-saving evidence or your life’s work. |
 
 
 
