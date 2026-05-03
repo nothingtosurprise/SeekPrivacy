@@ -25,7 +25,9 @@
 ## 🛡️ The "No-Trade-Off" Revolution
 Standard vaults create a clunky "island." **SeekPrivacy** creates a shield. Apps like social media and photo editors demand "All Files Access"—if you refuse, they break. If you accept, they spy.  This creates a painful **trade-off** between **functionality** and **privacy**.
 
-**SeekPrivacy eliminates this blackmail.** We cloak your private data so that even if a malicious app has full device control, it sees **nothing**.
+It provides multi-layered defense by isolating data within encrypted sandbox, inaccessible to other apps, the OS, or unauthorized physical extraction - providing activist grade security with file management - With the Belief "Privacy Without the Tradeoff of Ease" 
+
+**SeekPrivacy eliminates this blackmail.** It provides **multi-layered** defense by isolating data within encrypted sandbox, inaccessible to **other apps**, the **OS**, or **unauthorized physical extraction** - providing activist grade security - With the Belief "Privacy Without the Tradeoff of Ease"  - even if a malicious app has full device control, it sees **nothing**.
 
 ## ✊ The Activist Grade: "Trauma-Resilient" Defense
 In high-risk environments, the greatest threat isn't just a remote hacker—it's **Physiological Stress**. When a device is seized or a user is detained, acute trauma causes cognitive blockages. In traditional FOSS vaults, forgetting your pattern means your evidence, your contacts, and your protection are effectively dead.
