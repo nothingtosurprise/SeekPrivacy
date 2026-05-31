@@ -13,7 +13,8 @@
 
 | Source | Status |
 |--------|--------|
-| **Github Releases** | [![GitHub release](https://img.shields.io/github/v/release/duckniii/SeekPrivacy?label=Latest)](https://github.com/duckniii/SeekPrivacy/releases/download/v3.0.1/seekprivacy-v3.0.1-release.apk) |
+| **Github Releases** | [![GitHub release](https://img.shields.io/github/v/release/duckniii/SeekPrivacy?label=Latest)](https://github.com/duckniii/SeekPrivacy/releases/download/v3.0.2/seekprivacy-v3.0.2-release.apk) |
+| **F-Droid** | [![Get it on F-Droid](https://fdroid.gitlab.io/artwork/badge/get-it-on.png)](https://f-droid.org/packages/com.seeker.seekprivacy/) |
 | **IzzyOnDroid** | [![IzzyOnDroid](https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/com.seeker.seekprivacy)](https://apt.izzysoft.de/packages/com.seeker.seekprivacy) |
 | **Android Freeware** | [![Android Freeware](https://img.shields.io/badge/Download-Android%20Freeware-blue?logo=android)](https://www.androidfreeware.net/download-seekprivacy-apk.html) |
 | **OpenAPK** | [![OpenAPK](https://img.shields.io/badge/Download-OpenAPK-orange?logo=android)](https://www.openapk.net/seekprivacy/com.seeker.seekprivacy/) |

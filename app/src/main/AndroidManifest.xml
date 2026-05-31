@@ -27,17 +27,17 @@
 
         <activity
             android:name=".DashboardActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.scanner" />
 
         <activity
             android:name=".FolderFilesActivity"
-            android:exported="true"
+            android:exported="false"
             android:theme="@style/Theme.scanner" />
             
        <activity
     android:name="com.seeker.seekprivacy.CustomPatternActivity"
-    android:exported="true"
+    android:exported="false"
     android:theme="@style/Theme.scanner" />
             
          <provider

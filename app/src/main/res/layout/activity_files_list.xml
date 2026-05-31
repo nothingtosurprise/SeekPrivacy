@@ -19,17 +19,16 @@
             app:titleTextColor="@android:color/white"
             app:titleCentered="true"
             app:title="Files"
-            app:navigationIcon="@drawable/ic_back" app:navigationIconTint="@android:color/white" /> 
+            app:navigationIcon="@drawable/ic_back" 
+            app:navigationIconTint="@android:color/white" /> 
             
-       <androidx.appcompat.widget.SearchView
-           android:id="@+id/searchview"
-           android:layout_width="match_parent"
-           android:layout_height="wrap_content"
-           app:queryHint="Search Files..."
-           app:iconifiedByDefault="false"
-       
-       />
-            </com.google.android.material.appbar.AppBarLayout>
+        <androidx.appcompat.widget.SearchView
+            android:id="@+id/searchview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:queryHint="Search Files..."
+            app:iconifiedByDefault="false" />
+    </com.google.android.material.appbar.AppBarLayout>
 
     <LinearLayout
         android:orientation="vertical"
@@ -40,10 +39,40 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/filesRecyclerView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
             android:clipToPadding="false"
             android:paddingTop="8dp"
-            android:paddingBottom="100dp" />
+            android:paddingBottom="16dp" />
+            
+        <LinearLayout
+            android:id="@+id/batchActionsBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="#1F1F1F"
+            android:padding="16dp"
+            android:gravity="center_vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/batchCountText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="0 items selected"
+                android:textColor="#FFFFFF"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+
+            <Button
+                android:id="@+id/btnShowBatchOptions"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Actions"
+                android:backgroundTint="#FF9800"
+                android:textColor="#000000" />
+        </LinearLayout>
     </LinearLayout>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -55,19 +84,17 @@
         app:layout_anchor="@id/filesRecyclerView"
         app:layout_anchorGravity="bottom|end"
         android:layout_margin="24dp"
-        app:tint="@android:color/black" app:backgroundTint="#FF9800" /> 
+        app:tint="@android:color/black" 
+        app:backgroundTint="#FF9800" /> 
         
     <TextView
-       android:id="@+id/count"
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content"
-       android:text="0 Files"
-       android:textColor="#FFFFFF"
-       android:textSize="14sp"
-       android:layout_gravity="bottom|center"
-    
-    />
-    
-        
+        android:id="@+id/count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="0 Files"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:layout_gravity="bottom|center"
+        android:layout_marginBottom="70dp" />
         
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -1,0 +1,7 @@
+v3.0.2 - Multiple File Handling & Backup
+ - Added multiple file selection for encryption.
+ - Added multiple file selection for decryption.
+ - Added functionality to move files to external storage or SD card.
+ - Implemented file backup capability via external/SD card transfer.
+ - Added file properties viewer.
+  

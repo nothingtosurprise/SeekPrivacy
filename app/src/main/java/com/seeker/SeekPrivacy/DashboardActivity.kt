@@ -615,8 +615,8 @@ private fun showSystemAuthForSetup(onSuccess: () -> Unit) {
     val subject = android.net.Uri.encode("Developer Security Net Request")
     val body = "Device ID: $deviceId\n" +
                "Request Type: [REGISTRATION / RECOVERY]\n\n" +
-               "I am ________ (setting up / requesting a bypass). " +
-               "Please ________ (initiate my security questions / provide my token)."
+               "I am (setting up / requesting a bypass). " +
+               "Please (initiate my security questions / provide my token)."
     
 
     val uriString = "mailto:$formattedEmail?subject=$subject&body=$body"

@@ -49,6 +49,17 @@ import android.text.InputFilter
 import android.view.WindowManager
 
 
+import android.view.Menu
+import android.view.MenuItem
+
+import android.widget.LinearLayout
+import android.widget.Button
+
+
+import java.nio.channels.FileChannel
+
+
+
 
 
 class FolderFilesActivity : AppCompatActivity() {
@@ -143,6 +154,20 @@ private var isProcessing = false
 
     private var progressDialog: AlertDialog? = null
     private lateinit var openDocumentLauncher: ActivityResultLauncher<Intent>
+    
+    private var multiSelectDialog: AlertDialog? = null
+    
+    private var filesToMoveToStorage: List<File> = emptyList()
+    
+    private var batchActionBanner: AlertDialog? = null
+    
+    private var selectionDialog: androidx.appcompat.app.AlertDialog? = null
+    
+    private lateinit var batchActionsBar: LinearLayout
+private lateinit var batchCountText: TextView
+private lateinit var btnShowBatchOptions: Button
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -167,6 +192,15 @@ private var isProcessing = false
         recyclerView = findViewById(R.id.filesRecyclerView)
         searchView = findViewById(R.id.searchview)
         countTextView = findViewById(R.id.count)
+        
+        batchActionsBar = findViewById<LinearLayout>(R.id.batchActionsBar)
+batchCountText = findViewById<TextView>(R.id.batchCountText)
+btnShowBatchOptions = findViewById<Button>(R.id.btnShowBatchOptions)
+
+btnShowBatchOptions.setOnClickListener {
+    showMultiSelectOptionsDialog()
+}
+
 
         isEncryptedFolder = intent.getBooleanExtra("isEncryptedFolder", true)
         val rawPass = intent.getStringExtra("verificationString") ?: ""
@@ -350,17 +384,459 @@ override fun onPause() {
     }
 
     private fun setupRecyclerView() {
-        fileAdapter = FileAdapter(encryptedFiles) { file ->
+    fileAdapter = FileAdapter(
+        fileList = encryptedFiles,
+        onItemClick = { file ->
             if (file.isDirectory) {
                 currentDir = file
                 loadFileList()
             } else {
                 handleFileAccess(file)
             }
+        },
+        onSelectionChanged = { hasSelection ->
+            if (hasSelection) {
+                val size = fileAdapter.selectedFiles.size
+                batchCountText.text = "$size items selected"
+                batchActionsBar.visibility = View.VISIBLE
+            } else {
+                batchActionsBar.visibility = View.GONE
+            }
         }
-        recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = fileAdapter
+    )
+    recyclerView.layoutManager = LinearLayoutManager(this)
+    recyclerView.adapter = fileAdapter
+}
+
+
+
+private fun showFloatingActionBanner() {
+    val count = fileAdapter.selectedFiles.size
+    
+
+    if (batchActionBanner?.isShowing == true) {
+        batchActionBanner?.setTitle("$count items highlighted")
+        return
     }
+
+    batchActionBanner = AlertDialog.Builder(this)
+        .setTitle("$count items highlighted")
+        .setMessage("Choose an action to perform on your selected files.")
+        .setPositiveButton("Choose Action") { _, _ ->
+
+            showMultiSelectOptionsDialog() 
+        }
+        .setNegativeButton("Clear Selection") { dialog, _ ->
+            fileAdapter.clearSelection()
+            dialog.dismiss()
+        }
+        .setCancelable(false) 
+        .create()
+
+
+    batchActionBanner?.window?.setGravity(android.view.Gravity.BOTTOM)
+    batchActionBanner?.show()
+}
+
+private fun hideFloatingActionBanner() {
+    batchActionBanner?.dismiss()
+    batchActionBanner = null
+}
+
+override fun onCreateOptionsMenu(menu: Menu): Boolean {
+
+    if (::fileAdapter.isInitialized && fileAdapter.isSelectionMode) {
+        val actionItem = menu.add(Menu.NONE, 999, Menu.NONE, "Actions")
+        actionItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS)
+        
+        
+    }
+    return super.onCreateOptionsMenu(menu)
+}
+
+override fun onOptionsItemSelected(item: MenuItem): Boolean {
+    if (item.itemId == 999) {
+
+        showMultiSelectOptionsDialog()
+        return true
+    }
+    return super.onOptionsItemSelected(item)
+}
+
+
+
+private fun showActiveSelectionMenu() {
+    val selectedCount = fileAdapter.selectedFiles.size
+    if (selectedCount == 0) {
+        selectionDialog?.dismiss()
+        return
+    }
+
+    val options = if (isEncryptedFolder) {
+        arrayOf(
+            "Decrypt Selected ($selectedCount)", 
+            "Delete Selected ($selectedCount)", 
+            "Move Selected (App Folders)", 
+            "Export to Device/SD Card",
+            "Cancel Selection"
+        )
+    } else {
+        arrayOf(
+            "Encrypt Selected ($selectedCount)", 
+            "Delete Selected ($selectedCount)", 
+            "Move Selected (App Folders)", 
+            "Export to Device/SD Card",
+            "Cancel Selection"
+        )
+    }
+
+
+    selectionDialog?.dismiss()
+
+    selectionDialog = AlertDialog.Builder(this)
+        .setTitle("$selectedCount Files Selected")
+        .setItems(options) { _, which ->
+            val selectedList = fileAdapter.selectedFiles.toList()
+            when (which) {
+                0 -> if (isEncryptedFolder) promptBatchDecryption(selectedList) else promptBatchEncryption(selectedList)
+                1 -> confirmBatchDeletion(selectedList)
+                2 -> showBatchMoveDialog(selectedList)
+                3 -> promptMoveToDeviceOrSDCard(selectedList)
+                4 -> fileAdapter.clearSelection() // Cancel selection
+            }
+        }
+        .setCancelable(false) 
+        .create()
+
+
+    selectionDialog?.window?.setGravity(android.view.Gravity.BOTTOM)
+    selectionDialog?.show()
+}
+
+
+private fun showMultiSelectOptionsDialog() {
+    val selected = fileAdapter.selectedFiles.toList()
+    if (selected.isEmpty()) return
+    
+    val options = if (isEncryptedFolder) {
+        arrayOf("Decrypt Selected (${selected.size})", "Delete Selected", "Move Selected (App Folders)", "Export to Device/SD Card")
+    } else {
+        arrayOf("Encrypt Selected (${selected.size})", "Delete Selected", "Move Selected (App Folders)", "Export to Device/SD Card")
+    }
+
+    multiSelectDialog?.dismiss()
+
+    multiSelectDialog = AlertDialog.Builder(this)
+        .setTitle("${selected.size} items selected")
+        .setItems(options) { _, which ->
+            when (which) {
+                0 -> if (isEncryptedFolder) promptBatchDecryption(selected) else promptBatchEncryption(selected)
+                1 -> confirmBatchDeletion(selected)
+                2 -> showBatchMoveDialog(selected)
+                3 -> promptMoveToDeviceOrSDCard(selected) 
+            }
+        }
+        .setOnCancelListener {
+            fileAdapter.clearSelection()
+        }
+        .create()
+
+    multiSelectDialog?.show()
+}
+
+private fun hideMultiSelectOptionsDialog() {
+    multiSelectDialog?.dismiss()
+    multiSelectDialog = null
+}
+
+
+// Batch Operations
+
+private fun promptBatchDecryption(files: List<File>) {
+    checkAuth {
+        showLoadingDialog("Decrypting ${files.size} items...")
+        lifecycleScope.launch {
+            withContext(Dispatchers.IO) {
+                files.forEach { file ->
+                    try {
+                        val decryptedName = file.name.removeSuffix(".enc")
+                        val fileSize = file.length() 
+                        val limit = 50 * 1024 * 1024
+                        val baseDir = if (fileSize > limit) decryptedDir else File(filesDir, "Decrypted")
+                        
+                        if (!baseDir.exists()) baseDir.mkdirs()
+                        val targetFile = File(baseDir, decryptedName)
+                        
+                        val tempCacheFile = File.createTempFile("batch_dec_", ".tmp", cacheDir)
+                        
+
+                        decryptFile(file, tempCacheFile)
+                        
+                        if (tempCacheFile.exists() && tempCacheFile.length() > 0) {
+                            file.delete()
+                            if (!tempCacheFile.renameTo(targetFile)) {
+                                tempCacheFile.copyTo(targetFile, overwrite = true)
+                                tempCacheFile.delete()
+                            }
+                        } else {
+                            tempCacheFile.delete()
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+            withContext(Dispatchers.Main) {
+                fileAdapter.clearSelection()
+                batchActionsBar.visibility = View.GONE
+                loadFileList()
+                hideLoadingDialog()
+                Toast.makeText(this@FolderFilesActivity, "Batch decryption completed successfully", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+}
+
+private fun promptBatchEncryption(files: List<File>) {
+    showLoadingDialog("Encrypting ${files.size} items...")
+    lifecycleScope.launch {
+        withContext(Dispatchers.IO) {
+            files.forEach { file ->
+                try {
+                    val newName = if (file.name.endsWith(".enc")) file.name else "${file.name}.enc"
+                    
+                    val relativePath = if (currentDir.absolutePath.startsWith(internalEncDir.absolutePath)) {
+                        currentDir.absolutePath.removePrefix(internalEncDir.absolutePath)
+                    } else if (currentDir.absolutePath.startsWith(encryptedDir.absolutePath)) {
+                        currentDir.absolutePath.removePrefix(encryptedDir.absolutePath)
+                    } else {
+                        "" 
+                    }
+
+                    val targetFile = getTargetFile(newName, file.length(), relativePath)
+                    
+                    encryptFile(FileInputStream(file), targetFile)
+                    secureDelete(file)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        }
+        fileAdapter.clearSelection()
+        hideFloatingActionBanner()
+        loadFileList()
+        hideLoadingDialog()
+        Toast.makeText(this@FolderFilesActivity, "Batch encryption completed", Toast.LENGTH_SHORT).show()
+    }
+}
+
+private fun confirmBatchDeletion(files: List<File>) {
+    AlertDialog.Builder(this)
+        .setTitle("Delete ${files.size} items?")
+        .setMessage("This action cannot be undone. All selected files will be permanently removed.")
+        .setPositiveButton("Delete") { _, _ ->
+            showLoadingDialog("Deleting items...")
+            lifecycleScope.launch {
+                var deleteCount = 0
+                withContext(Dispatchers.IO) {
+                    files.forEach { file ->
+                        if (secureDelete(file)) {
+                            deleteCount++
+                        }
+                    }
+                }
+                fileAdapter.clearSelection()
+                hideFloatingActionBanner()
+                loadFileList()
+                hideLoadingDialog()
+                Toast.makeText(this@FolderFilesActivity, "Deleted $deleteCount files successfully", Toast.LENGTH_SHORT).show()
+            }
+        }
+        .setNegativeButton("Cancel") { _, _ ->
+            fileAdapter.clearSelection()
+        }
+        .show()
+}
+
+
+private fun showBatchMoveDialog(files: List<File>) {
+    val internalBase = if (isEncryptedFolder) File(filesDir, "Encrypted") else File(filesDir, "Decrypted")
+    val externalBase = if (isEncryptedFolder) encryptedDir else decryptedDir
+
+    val internalSubs = internalBase.listFiles { f -> f.isDirectory }?.toList() ?: emptyList()
+    val externalSubs = externalBase.listFiles { f -> f.isDirectory }?.toList() ?: emptyList()
+    val allFolderNames = (internalSubs.map { it.name } + externalSubs.map { it.name }).distinct()
+
+    val options = mutableListOf<String>()
+    val isAtRoot = (currentDir.absolutePath == internalBase.absolutePath || currentDir.absolutePath == externalBase.absolutePath)
+    if (!isAtRoot) options.add(".. (Back to Root)")
+    options.addAll(allFolderNames)
+
+    if (options.isEmpty()) {
+        Toast.makeText(this, "No target subfolders available", Toast.LENGTH_SHORT).show()
+        fileAdapter.clearSelection()
+        return
+    }
+
+    AlertDialog.Builder(this)
+        .setTitle("Move ${files.size} items to:")
+        .setItems(options.toTypedArray()) { _, which ->
+            val selection = options[which]
+            showLoadingDialog("Moving files...")
+            
+            lifecycleScope.launch {
+                withContext(Dispatchers.IO) {
+                    files.forEach { file ->
+                        val fileSize = file.length()
+                        val limit = 50 * 1024 * 1024 
+                        val targetBase = if (fileSize > limit) externalBase else internalBase
+                        
+                        val targetDir = if (selection == ".. (Back to Root)") {
+                            targetBase
+                        } else {
+                            File(targetBase, selection)
+                        }
+
+                        if (!targetDir.exists()) targetDir.mkdirs()
+
+
+                        val destFile = File(targetDir, file.name)
+                        try {
+                            if (!file.renameTo(destFile)) {
+                                file.inputStream().use { input ->
+                                    destFile.outputStream().use { output ->
+                                        input.copyTo(output)
+                                    }
+                                }
+                                secureDelete(file)
+                            }
+                        } catch (e: Exception) {
+                            if (destFile.exists()) secureDelete(destFile)
+                        }
+                    }
+                }
+                fileAdapter.clearSelection()
+                hideFloatingActionBanner()
+                loadFileList() 
+                hideLoadingDialog()
+                Toast.makeText(this@FolderFilesActivity, "Batch move complete", Toast.LENGTH_SHORT).show()
+            }
+        }
+        .setOnCancelListener {
+            fileAdapter.clearSelection()
+        }
+        .show()
+}
+
+
+// External storage or sdcard move/ backup operation
+
+private val pickStorageLocationLauncher = registerForActivityResult(
+    ActivityResultContracts.StartActivityForResult()
+) { result ->
+    if (result.resultCode == RESULT_OK) {
+        val treeUri = result.data?.data ?: return@registerForActivityResult
+        
+
+        val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+        contentResolver.takePersistableUriPermission(treeUri, takeFlags)
+
+
+        executeMoveToExternalStorage(treeUri, filesToMoveToStorage)
+    }
+}
+
+
+private fun promptMoveToDeviceOrSDCard(files: List<File>) {
+    filesToMoveToStorage = files
+    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+
+        putExtra("android.provider.extra.SHOW_ADVANCED", true) 
+    }
+    Toast.makeText(this, "Select your SD Card or Internal Storage root folder", Toast.LENGTH_LONG).show()
+    pickStorageLocationLauncher.launch(intent)
+}
+
+private fun executeMoveToExternalStorage(treeUri: Uri, files: List<File>) {
+    showLoadingDialog("Exporting ${files.size} items...")
+    
+    lifecycleScope.launch(Dispatchers.IO) {
+        try {
+            val rootFolder = androidx.documentfile.provider.DocumentFile.fromTreeUri(this@FolderFilesActivity, treeUri)
+            if (rootFolder == null || !rootFolder.canWrite()) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@FolderFilesActivity, "Selected storage is read-only or invalid", Toast.LENGTH_LONG).show()
+                    hideLoadingDialog()
+                }
+                return@launch
+            }
+
+
+            var targetFolder = rootFolder.findFile("seekprivacy")
+            if (targetFolder == null || !targetFolder.isDirectory) {
+                targetFolder = rootFolder.createDirectory("seekprivacy")
+            }
+
+            if (targetFolder == null) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@FolderFilesActivity, "Failed to create seekprivacy directory", Toast.LENGTH_SHORT).show()
+                    hideLoadingDialog()
+                }
+                return@launch
+            }
+
+            var successCount = 0
+
+            files.forEach { file ->
+                try {
+
+                    var targetFileDoc = targetFolder.findFile(file.name)
+                    if (targetFileDoc == null) {
+                        val extension = file.extension.lowercase()
+                        val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension) ?: "*/*"
+                        targetFileDoc = targetFolder.createFile(mimeType, file.name)
+                    }
+
+                    targetFileDoc?.uri?.let { destUri ->
+                        contentResolver.openOutputStream(destUri).use { outputStream ->
+                            java.io.FileInputStream(file).use { inputStream ->
+                                if (outputStream != null) {
+                                    val buffer = ByteArray(64 * 1024)
+                                    var length: Int
+                                    while (inputStream.read(buffer).also { length = it } > 0) {
+                                        outputStream.write(buffer, 0, length)
+                                    }
+                                    outputStream.flush()
+                                    
+
+                                    secureDelete(file)
+                                    successCount++
+                                }
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+            withContext(Dispatchers.Main) {
+                fileAdapter.clearSelection()
+                hideFloatingActionBanner()
+                loadFileList()
+                hideLoadingDialog()
+                Toast.makeText(this@FolderFilesActivity, "Successfully moved $successCount items to seekprivacy", Toast.LENGTH_LONG).show()
+            }
+
+        } catch (e: Exception) {
+            withContext(Dispatchers.Main) {
+                hideLoadingDialog()
+                Toast.makeText(this@FolderFilesActivity, "Storage migration failed: ${e.message}", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+}
+
 
     private fun setupPickers() {
         addFileFab.setOnClickListener { openFilePicker() }
@@ -626,29 +1102,50 @@ private fun unwrapAESKey(wrappedKey: ByteArray): SecretKey {
     }
 }
 
-    private suspend fun decryptFileUri(uri: Uri, isBatch: Boolean = false) {
-        withContext(Dispatchers.IO) {
-            try {
-                val inputStream = contentResolver.openInputStream(uri) ?: return@withContext
-                val fileName = queryFileName(uri)?.removeSuffix(".enc") ?: "file_${System.currentTimeMillis()}"
-                val encryptedSize = contentResolver.openAssetFileDescriptor(uri, "r")?.length ?: 0
-                
+   private suspend fun decryptFileUri(uri: Uri, isBatch: Boolean = false) {
+    withContext(Dispatchers.IO) {
+        try {
+            val contentResolver = this@FolderFilesActivity.contentResolver
+            val inputStream = contentResolver.openInputStream(uri) ?: return@withContext
+            val fileName = queryFileName(uri)?.removeSuffix(".enc") ?: "file_${System.currentTimeMillis()}"
+            val encryptedSize = contentResolver.openAssetFileDescriptor(uri, "r")?.use { it.length } ?: 0
 
-                val baseDir = if (encryptedSize > 50 * 1024 * 1024) decryptedDir else File(filesDir, "Decrypted")
-                if (!baseDir.exists()) baseDir.mkdirs()
-                
-                val outputFile = File(baseDir, fileName)
-                decryptFile(inputStream, outputFile)
-                deleteExternalFile(uri)
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@FolderFilesActivity, "Decryption failed: ${e.message}", Toast.LENGTH_LONG).show()
+            val baseDir = if (encryptedSize > 50 * 1024 * 1024) decryptedDir else File(filesDir, "Decrypted")
+            if (!baseDir.exists()) baseDir.mkdirs()
+            
+            val outputFile = File(baseDir, fileName)
+            val tempCacheFile = File.createTempFile("uri_dec_", ".tmp", cacheDir)
+
+            java.io.BufferedInputStream(inputStream, 256 * 1024).use { bis ->
+                java.io.FileOutputStream(tempCacheFile).use { fos ->
+                    java.io.BufferedOutputStream(fos, 256 * 1024).use { bos ->
+                        val buffer = ByteArray(256 * 1024)
+                        var bytesRead: Int
+                        while (bis.read(buffer).also { bytesRead = it } != -1) {
+                            bos.write(buffer, 0, bytesRead)
+                        }
+                        bos.flush()
+                    }
                 }
             }
-        }
-        if (!isBatch) loadFileList()
-    }
 
+            decryptFile(tempCacheFile, outputFile)
+            tempCacheFile.delete()
+            deleteExternalFile(uri)
+
+        } catch (t: Throwable) {
+            t.printStackTrace()
+            withContext(Dispatchers.Main) {
+                Toast.makeText(this@FolderFilesActivity, "System Decryption Link Failed", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+    if (!isBatch) {
+        withContext(Dispatchers.Main) {
+            loadFileList()
+        }
+    }
+}
     private fun encryptFile(inputStream: InputStream, outputFile: File) {
     isProcessing = true 
     try {
@@ -657,11 +1154,19 @@ private fun unwrapAESKey(wrappedKey: ByteArray): SecretKey {
         
         cipher.init(Cipher.ENCRYPT_MODE, masterKey, GCMParameterSpec(GCM_TAG_LENGTH, iv))
         
-        java.io.FileOutputStream(outputFile).use { fos ->
-            fos.write(VERSION_GCM.toInt()) 
-            fos.write(iv)
-            javax.crypto.CipherOutputStream(fos, cipher).use { cos -> 
-                inputStream.copyTo(cos) 
+
+        inputStream.use { input ->
+            java.io.FileOutputStream(outputFile).use { fos ->
+                fos.write(VERSION_GCM.toInt()) 
+                fos.write(iv)
+                javax.crypto.CipherOutputStream(fos, cipher).use { cos -> 
+                    val buffer = ByteArray(64 * 1024) // Fast 64KB Buffer
+                    var bytesRead: Int
+                    while (input.read(buffer).also { bytesRead = it } != -1) {
+                        cos.write(buffer, 0, bytesRead)
+                    }
+                    cos.flush()
+                }
             }
         }
     } finally {
@@ -670,41 +1175,6 @@ private fun unwrapAESKey(wrappedKey: ByteArray): SecretKey {
     }
 }
 
-private fun decryptFile(inputStream: InputStream, outputFile: File) {
-    isProcessing = true
-    try {
-        val firstByte = inputStream.read()
-        
-        if (firstByte == VERSION_GCM.toInt()) {
-            val iv = ByteArray(GCM_IV_LENGTH).apply { inputStream.read(this) }
-            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-            cipher.init(Cipher.DECRYPT_MODE, masterKey, GCMParameterSpec(GCM_TAG_LENGTH, iv))
-            
-            java.io.FileOutputStream(outputFile).use { fos ->
-                javax.crypto.CipherInputStream(inputStream, cipher).use { cis -> 
-                    cis.copyTo(fos) 
-                }
-            }
-        } else {
-
-            val iv = ByteArray(16).apply {
-                this[0] = firstByte.toByte()
-                inputStream.read(this, 1, 15)
-            }
-            val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
-            cipher.init(Cipher.DECRYPT_MODE, masterKey, javax.crypto.spec.IvParameterSpec(iv))
-            
-            java.io.FileOutputStream(outputFile).use { fos ->
-                javax.crypto.CipherInputStream(inputStream, cipher).use { cis -> 
-                    cis.copyTo(fos) 
-                }
-            }
-        }
-    } finally {
-        isProcessing = false
-        resetInactivityTimer()
-    }
-}
 
 
 private fun resetInactivityTimer() {
@@ -919,8 +1389,8 @@ private fun showNewPasswordDialog() {
     val formattedEmail = "$developerName <$developerEmail>"
     val body = "Device ID: $deviceId\n" +
                "Request Type: [REGISTRATION / RECOVERY]\n\n" +
-               "I am ________ (setting up / requesting a bypass). " +
-               "Please ________ (initiate my security questions / provide my token)."
+               "I am (setting up / requesting a bypass). " +
+               "Please (initiate my security questions / provide my token)."
     
 
     val uriString = "mailto:$formattedEmail?subject=$subject&body=$body"
@@ -1135,7 +1605,7 @@ AlertDialog.Builder(this)
                 1 -> showRenameDialog(file)
                 2 -> { confirmDeletion(file); loadFileList() }
                 3 -> showMoveDialog(file)
-                4 -> showFileProperties(file) // New Property Option
+                4 -> showFileProperties(file) 
             }
         } else {
             when (which) {
@@ -1145,7 +1615,7 @@ AlertDialog.Builder(this)
                 3 -> showRenameDialog(file)
                 4 -> { confirmDeletion(file); loadFileList() }
                 5 -> showMoveDialog(file)
-                6 -> showFileProperties(file) // New Property Option
+                6 -> showFileProperties(file) 
             }
         }
     }
@@ -1173,7 +1643,7 @@ AlertDialog.Builder(this)
         .show()
 }
 
-// Helpers to make the data look nice
+
 private fun formatSize(bytes: Long): String {
     if (bytes < 1024) return "$bytes B"
     val exp = (Math.log(bytes.toDouble()) / Math.log(1024.0)).toInt()
@@ -1309,25 +1779,102 @@ private fun formatDate(timestamp: Long): String {
     }
 }
 
-
-private fun performDecryption(file: File) {
-    showLoadingDialog("Moving to Decrypted...")
-    lifecycleScope.launch {
-        withContext(Dispatchers.IO) {
-            val decryptedName = file.name.removeSuffix(".enc")
-            
-            val fileSize = file.length() 
-            val limit = 50 * 1024 * 1024
-            val baseDir = if (fileSize > limit) decryptedDir else File(filesDir, "Decrypted")
-            
-            if (!baseDir.exists()) baseDir.mkdirs()
-            val targetFile = File(baseDir, decryptedName)
-            
-            decryptFile(FileInputStream(file), targetFile)
-            secureDelete(file)
+  private fun decryptFile(inputFile: File, outputFile: File) {
+    isProcessing = true
+    
+    // Expand the processing buffer to 2 Megabytes for maximum stream speed
+    val bufferSize = 2 * 1024 * 1024 
+    
+    try {
+        java.io.FileInputStream(inputFile).use { fis ->
+            java.io.BufferedInputStream(fis, bufferSize).use { bis ->
+                val firstByte = bis.read()
+                if (firstByte == -1) return 
+                
+                java.io.FileOutputStream(outputFile).use { fos ->
+                    java.io.BufferedOutputStream(fos, bufferSize).use { bos ->
+                        
+                        if (firstByte.toInt() == VERSION_GCM.toInt()) {
+                            val iv = ByteArray(GCM_IV_LENGTH).apply { bis.read(this) }
+                            val cipher = javax.crypto.Cipher.getInstance("AES/GCM/NoPadding")
+                            cipher.init(javax.crypto.Cipher.DECRYPT_MODE, masterKey, javax.crypto.spec.GCMParameterSpec(GCM_TAG_LENGTH, iv))
+                            
+                            // Using the stable CipherInputStream structure with the expanded buffer
+                            javax.crypto.CipherInputStream(bis, cipher).use { cis ->
+                                val buffer = ByteArray(bufferSize)
+                                var bytesRead: Int
+                                while (cis.read(buffer).also { bytesRead = it } != -1) {
+                                    bos.write(buffer, 0, bytesRead)
+                                }
+                            }
+                        } else {
+                            // Legacy CBC Mode
+                            val iv = ByteArray(16).apply {
+                                this[0] = firstByte.toByte()
+                                bis.read(this, 1, 15)
+                            }
+                            val cipher = javax.crypto.Cipher.getInstance("AES/CBC/PKCS5Padding")
+                            cipher.init(javax.crypto.Cipher.DECRYPT_MODE, masterKey, javax.crypto.spec.IvParameterSpec(iv))
+                            
+                            javax.crypto.CipherInputStream(bis, cipher).use { cis ->
+                                val buffer = ByteArray(bufferSize)
+                                var bytesRead: Int
+                                while (cis.read(buffer).also { bytesRead = it } != -1) {
+                                    bos.write(buffer, 0, bytesRead)
+                                }
+                            }
+                        }
+                        bos.flush()
+                    }
+                }
+            }
         }
+    } finally {
+        isProcessing = false
+        resetInactivityTimer()
+    }
+}
+ private fun performDecryption(file: File) {
+    showLoadingDialog("Decrypting File...")
+    lifecycleScope.launch {
+        val success = withContext(Dispatchers.IO) {
+            try {
+                val decryptedName = file.name.removeSuffix(".enc")
+                val fileSize = file.length() 
+                val limit = 50 * 1024 * 1024
+                val baseDir = if (fileSize > limit) decryptedDir else File(filesDir, "Decrypted")
+                
+                if (!baseDir.exists()) baseDir.mkdirs()
+                val targetFile = File(baseDir, decryptedName)
+                
+                val tempCacheFile = File.createTempFile("dec_cache_", ".tmp", cacheDir)
+                
+                decryptFile(file, tempCacheFile)
+                
+                if (tempCacheFile.exists() && tempCacheFile.length() > 0) {
+                    file.delete()
+                    if (!tempCacheFile.renameTo(targetFile)) {
+                        tempCacheFile.copyTo(targetFile, overwrite = true)
+                        tempCacheFile.delete()
+                    }
+                    true
+                } else {
+                    tempCacheFile.delete()
+                    false
+                }
+            } catch (t: Throwable) { 
+                t.printStackTrace()
+                false
+            }
+        }
+        
         loadFileList()
         hideLoadingDialog()
+        if (success) {
+            Toast.makeText(this@FolderFilesActivity, "Decrypted successfully", Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(this@FolderFilesActivity, "Decryption error: Check system storage", Toast.LENGTH_SHORT).show()
+        }
     }
 }
 
@@ -1337,7 +1884,7 @@ private fun performDecryption(file: File) {
     
     lifecycleScope.launch {
         withContext(Dispatchers.IO) {
-            // 1. Calculate the relative path of where you are right now
+
             val relativePath = if (currentDir.absolutePath.startsWith(internalEncDir.absolutePath)) {
                 currentDir.absolutePath.removePrefix(internalEncDir.absolutePath)
             } else if (currentDir.absolutePath.startsWith(encryptedDir.absolutePath)) {
