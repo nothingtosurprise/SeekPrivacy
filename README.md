@@ -14,8 +14,8 @@
 | Source | Status |
 |--------|--------|
 | **Github Releases** | [![GitHub release](https://img.shields.io/github/v/release/duckniii/SeekPrivacy?label=Latest)](https://github.com/duckniii/SeekPrivacy/releases/download/v3.0.2/seekprivacy-v3.0.2-release.apk) |
-| **F-Droid** | [![Get it on F-Droid](https://fdroid.gitlab.io/artwork/badge/get-it-on.png)](https://f-droid.org/packages/com.seeker.seekprivacy/) |
 | **IzzyOnDroid** | [![IzzyOnDroid](https://img.shields.io/endpoint?url=https://apt.izzysoft.de/fdroid/api/v1/shield/com.seeker.seekprivacy)](https://apt.izzysoft.de/packages/com.seeker.seekprivacy) |
+| **F-Droid** | <a href="https://f-droid.org/packages/com.seeker.seekprivacy"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="35" alt="Get it on F-Droid"></a> |
 | **Android Freeware** | [![Android Freeware](https://img.shields.io/badge/Download-Android%20Freeware-blue?logo=android)](https://www.androidfreeware.net/download-seekprivacy-apk.html) |
 | **OpenAPK** | [![OpenAPK](https://img.shields.io/badge/Download-OpenAPK-orange?logo=android)](https://www.openapk.net/seekprivacy/com.seeker.seekprivacy/) |
 | **Appteka** | [![Appteka](https://img.shields.io/badge/Download-Appteka-red?logo=android)](https://appteka.store/app/a54r258544) |
@@ -24,7 +24,7 @@
 
 
 ## 🛡️ The "No-Trade-Off" Revolution
-Standard vaults create a clunky "island." **SeekPrivacy** creates a shield. Apps like social media and basic tools demand "Storage Access"—if you refuse, they break. If you accept, they **spy**.  This creates a painful **trade-off** between **functionality** and **privacy**.
+Standard vaults create a clunky "island." **SeekPrivacy** creates a shield. Apps like social media and basic tools demand "Storage Access" if you refuse, they break. If you accept, they **spy**.  This creates a painful **trade-off** between **functionality** and **privacy**.
 
 
 ## The SeekPrivacy Shield
@@ -45,7 +45,7 @@ SeekPrivacy is built on the principle that your phone's operating system and oth
 
 
 ## ✊ The Activist Grade: "Trauma-Resilient" Defense
-In high-risk environments, the greatest threat isn't just a remote hacker—it's **Physiological Stress**. When a device is seized or a user is detained, acute trauma causes cognitive blockages. In traditional vaults, forgetting your pattern means your evidence, your contacts, and your protection are effectively dead.
+In high-risk environments, the greatest threat isn't just a remote hacker it's **Physiological Stress**. When a device is seized or a user is detained, acute trauma causes cognitive blockages. In traditional vaults, forgetting your pattern means your evidence, your contacts, and your protection are effectively dead.
 
 ### Secure Dev Last Resort
 SeekPrivacy is built for the human element. **Secure Dev Last Resort** is a world-first recovery bridge. By anchoring recovery to the non-exportable `ANDROID_ID` within the device’s physical **Trusted Execution Environment (TEE)** chip, it provide a secure "Extraction Point" for your data.
@@ -71,7 +71,7 @@ It's integrated with a full-featured management layer directly into the encrypte
 * **Anti-Forensic Shredder:** Deletion doesn't just "unlink" files. SeekPrivacy overwrites file headers and the first 1MB with cryptographic random noise (SecureRandom). This creates high-entropy data residue that camouflages deleted files, defeating forensic recovery tools (like Cellebrite) that look for standard "zero-filled" wiped blocks.
 * **Stealth Logic:** Screen-recording, screenshots, and "Recent Apps" snapshots are hardware-blocked (`FLAG_SECURE`).
 * **Developer Bypass UI Zero-Tension Recovery:** A world-first recovery system using a hardware-anchored `ANDROID_ID` for secure, encrypted bypass token requests. Never fear losing your data due to a forgotten password. Our Secure Dev Last Resort provides a world-first recovery bridge, giving you the peace of mind that your life's work is never permanently locked away.
-* **🚫 No Internet, No Leaks:** SeekPrivacy requests zero network permissions—total offline isolation means your data never leaves your device.
+* **🚫 No Internet, No Leaks:** SeekPrivacy requests zero network permissions, total offline isolation means your data never leaves your device.
 
 
 
@@ -86,7 +86,7 @@ It's integrated with a full-featured management layer directly into the encrypte
 ## Activist Threat Model & Defense Scenarios
 
 Forensic & Forced Protection (Protection from Physical Threats)
-While the core mission is to neutralize digital surveillance from a compromised OS or spying apps, the defense does not stop at the screen. SeekPrivacy is engineered to bridge the gap between digital security and physical reality. When the threat shifts from a background process to a physical encounter—such as a checkpoint seizure or a forced handover—the app activates high-defense protocols designed to survive forensic extraction and human duress.
+While the core mission is to neutralize digital surveillance from a compromised OS or spying apps, the defense does not stop at the screen. SeekPrivacy is engineered to bridge the gap between digital security and physical reality. When the threat shifts from a background process to a physical encounter, such as a checkpoint seizure or a forced handover, the app activates high-defense protocols designed to survive forensic extraction and human duress.
 
 When device seizure or a forced handover is imminent, SeekPrivacy shifts into high-defense mode:
 
@@ -113,7 +113,7 @@ To build the APK on your local machine, follow these instructions.
 1. **Clone the repository:**
    
 ```bash
-   git clone [https://github.com/duckniii/SeekPrivacy.git](https://github.com/duckniii/SeekPrivacy.git)
+   git clone https://github.com/duckniii/SeekPrivacy.git
    cd SeekPrivacy
 ```
 
