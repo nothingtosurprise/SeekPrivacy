@@ -1,7 +1,14 @@
-# 🛡️ Security Policy & Cryptographic Model [SECURITY-STABLE]
+# Security Policy & Cryptographic Model [SECURITY-STABLE]
 
-## 🏗️ Architectural Integrity (OWASP MASVS Aligned)
-SeekPrivacy v3.0 implements a "Zero-Trust" storage architecture designed to survive "All-Files Access" permission abuse and physical device seizure. This project follows high-standard security protocols to ensure activist-grade data protection.
+## Architectural Integrity (OWASP MASVS Aligned)
+
+SeekPrivacy implements a **Zero-Trust storage architecture** designed to survive system-level compromise, "Storage-Wide Access" permission abuse, and physical forensic seizure. The implementation is aligned with **OWASP MASVS** (Mobile Application Security Verification Standard) protocols to ensure activist-grade data protection.
+
+### Security Controls:
+
+*   **Storage Seclusion:** Strictly adheres to internal sandbox isolation, preventing data leaks to the shared Android file system and making data invisible to other apps.
+*   **Cryptographic Hardening:** Utilizes the Android Keystore System to ensure keys are hardware-bound within the TEE and physically non-exportable.
+*   **Active Memory Defense:** Implements manual memory zeroing of sensitive `CharArrays` and utilizes `FLAG_SECURE` to mitigate side-channel attacks and screen-scraping malware.
 
 ### 1. Supported Versions
 | Version | Supported          | Status             |
@@ -28,7 +35,7 @@ In high-stress activist environments, losing a password is a common point of fai
 * **Security Benefit:** Eliminates the catastrophic risk of permanent data loss due to trauma or forgotten patterns. It provides a secure, transparent recovery bridge without implementing a universal backdoor.
 
 
-## 🛡️ Reporting a Vulnerability
+## Reporting a Vulnerability
 Please do not report a **vulnerability** through public GitHub issues. 
 
 1. **Preferred Method:** Use the [GitHub Security Advisory](https://github.com/duckniii/SeekPrivacy/security/advisories/new) feature to report privately.
