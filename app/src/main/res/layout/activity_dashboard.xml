@@ -205,7 +205,15 @@
              <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="2. Now Activist-Grade Security: Never lose access even if you forget the recovery code. Strong hardware-backed KeyStore. - 5-minute RAM wipe. - Anti-forensic shredder. - Stealth logic. - Per-operation authentication with 5-minute cooldown. - Options for Password/Pattern/Biometrics (change mode anytime)."
+                android:text="2. New in Update v3.0.2 and 3.0.3: Now Decrypt, re-encrypt and delete multiple files at the same time instead of one by one. Backup and export files to internal storage or an SD card. Fixed a security vulnerability that bypassed the login window during recovery."
+                android:textColor="#BDBDBD"
+                android:textSize="14sp"
+                android:layout_marginBottom="4dp"/>
+                
+             <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="3. Now Activist-Grade Security (v3.0): Never lose access even if you forget the recovery code. Strong hardware-backed KeyStore. - 5-minute RAM wipe. - Anti-forensic shredder. - Stealth logic. - Per-operation authentication with 5-minute cooldown. - Options for Password/Pattern/Biometrics (change mode anytime)."
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"
                 android:layout_marginBottom="4dp"/>
@@ -213,7 +221,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="3. Warning: Uninstalling or clearing app data will permanently delete all files."
+                android:text="4. Warning: Uninstalling or clearing app data will permanently delete all files."
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"
                 android:layout_marginBottom="4dp"/>
@@ -221,7 +229,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="4. Upgraded to AES/GCM/NoPadding with Legacy Support"
+                android:text="5. Upgraded to AES/GCM/NoPadding with Legacy Support"
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"/>
           

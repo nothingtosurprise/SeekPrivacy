@@ -614,9 +614,9 @@ private fun showSystemAuthForSetup(onSuccess: () -> Unit) {
     val formattedEmail = "$developerName <$developerEmail>"
     val subject = android.net.Uri.encode("Developer Security Net Request")
     val body = "Device ID: $deviceId\n" +
-               "Request Type: [REGISTRATION / RECOVERY]\n\n" +
-               "I am (setting up / requesting a bypass). " +
-               "Please (initiate my security questions / provide my token)."
+               "Request Type: REGISTRATION / RECOVERY\n\n" +
+               "I am setting up. " +
+               "Please initiate my security questions."
     
 
     val uriString = "mailto:$formattedEmail?subject=$subject&body=$body"
@@ -772,6 +772,7 @@ private fun showNewPasswordDialog() {
             clipboard.setPrimaryClip(android.content.ClipData.newPlainText("DeviceID", deviceId))
             Toast.makeText(this, "ID copied to clipboard", Toast.LENGTH_SHORT).show()
         }
+        .setCancelable(false)
         .setNegativeButton("Email Developer") { _, _ ->
     val subject = Uri.encode("Security Bypass Request")
     val developerName = "Seeker"
@@ -780,9 +781,9 @@ private fun showNewPasswordDialog() {
 
     val formattedEmail = "$developerName <$developerEmail>"
     val body = "Device ID: $deviceId\n" +
-               "Request Type: [REGISTRATION / RECOVERY]\n\n" +
-               "I am ________ (setting up / requesting a bypass). " +
-               "Please ________ (initiate my security questions / provide my token)."
+               "Request Type: RECOVERY\n\n" +
+               "I am requesting a bypass. " +
+               "Please provide my token."
     
 
     val uriString = "mailto:$formattedEmail?subject=$subject&body=$body"
@@ -825,6 +826,7 @@ private fun showNewPasswordDialog() {
                 
             } else {
                 Toast.makeText(this, "Invalid Token or Tampered App", Toast.LENGTH_SHORT).show()
+                finishAffinity()
             }
         }.show()
 }
