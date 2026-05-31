@@ -1,0 +1,2 @@
+v3.0.4 - Security Fix 
+- Extended security fix of v3.0.3 - Resolved a vulnerability that allowed the login window to be bypassed during the copy Id at recovery/forgot-password stage.

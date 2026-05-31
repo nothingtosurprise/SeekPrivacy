@@ -771,6 +771,7 @@ private fun showNewPasswordDialog() {
             val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
             clipboard.setPrimaryClip(android.content.ClipData.newPlainText("DeviceID", deviceId))
             Toast.makeText(this, "ID copied to clipboard", Toast.LENGTH_SHORT).show()
+            finishAffinity()
         }
         .setCancelable(false)
         .setNegativeButton("Email Developer") { _, _ ->
