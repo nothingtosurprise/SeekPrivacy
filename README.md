@@ -18,7 +18,7 @@
 | **F-Droid** | <a href="https://f-droid.org/packages/com.seeker.seekprivacy"><img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" height="35" alt="Get it on F-Droid"></a> |
 | **Android Freeware** | [![Android Freeware](https://img.shields.io/badge/Download-Android%20Freeware-blue?logo=android)](https://www.androidfreeware.net/download-seekprivacy-apk.html) |
 | **OpenAPK** | [![OpenAPK](https://img.shields.io/badge/Download-OpenAPK-orange?logo=android)](https://www.openapk.net/seekprivacy/com.seeker.seekprivacy/) |
-| **Appteka** | [![Appteka](https://img.shields.io/badge/Download-Appteka-red?logo=android)](https://appteka.store/app/a54r258544) |
+| **Appteka** | [![Appteka](https://img.shields.io/badge/Download-Appteka-red?logo=android)](https://appteka.store/apps/bb7r284630) |
 
 
 
