@@ -164,8 +164,11 @@ private var isProcessing = false
     private var selectionDialog: androidx.appcompat.app.AlertDialog? = null
     
     private lateinit var batchActionsBar: LinearLayout
-private lateinit var batchCountText: TextView
-private lateinit var btnShowBatchOptions: Button
+    private lateinit var batchCountText: TextView
+    private lateinit var btnShowBatchOptions: Button
+    
+    private var isDirectImportMode = false
+    private lateinit var btnImportDirect: Button
 
 
 
@@ -194,32 +197,71 @@ private lateinit var btnShowBatchOptions: Button
         countTextView = findViewById(R.id.count)
         
         batchActionsBar = findViewById<LinearLayout>(R.id.batchActionsBar)
-batchCountText = findViewById<TextView>(R.id.batchCountText)
-btnShowBatchOptions = findViewById<Button>(R.id.btnShowBatchOptions)
+        batchCountText = findViewById<TextView>(R.id.batchCountText)
+        btnShowBatchOptions = findViewById<Button>(R.id.btnShowBatchOptions)
 
-btnShowBatchOptions.setOnClickListener {
-    showMultiSelectOptionsDialog()
-}
-
-
-        isEncryptedFolder = intent.getBooleanExtra("isEncryptedFolder", true)
-        val rawPass = intent.getStringExtra("verificationString") ?: ""
-        verificationString = rawPass.toCharArray()
-
-
-        rootDir = if (isEncryptedFolder) encryptedDir else decryptedDir
-        internalRootDir = if (isEncryptedFolder) internalEncDir else internalDecDir
+        btnShowBatchOptions.setOnClickListener {
+            showMultiSelectOptionsDialog()
+        }
         
-
-        currentDir = rootDir
-
-        if (!isEncryptedFolder) addFileFab.visibility = View.GONE
-
-        setupToolbar()
-        setupRecyclerView()
-        setupPickers()
+     
+    
 
 
+    isEncryptedFolder = intent.getBooleanExtra("isEncryptedFolder", true)
+    val rawPass = intent.getStringExtra("verificationString") ?: ""
+    verificationString = rawPass.toCharArray()
+    
+
+    rootDir = if (isEncryptedFolder) encryptedDir else decryptedDir
+    internalRootDir = if (isEncryptedFolder) internalEncDir else internalDecDir
+    currentDir = rootDir
+
+
+    if (!isEncryptedFolder) addFileFab.visibility = View.GONE
+
+
+    setupToolbar()
+    setupRecyclerView()
+    setupPickers()
+    
+    
+    
+    val mainContentWrapper = findViewById<LinearLayout>(R.id.mainContentWrapper)
+    
+
+    val barLayout = LinearLayout(this).apply {
+        layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        orientation = LinearLayout.HORIZONTAL
+        setPadding(16, 16, 16, 16)
+        setBackgroundColor(android.graphics.Color.parseColor("#1F1F1F"))
+        gravity = android.view.Gravity.CENTER
+    }
+
+
+    btnImportDirect = Button(this).apply {
+        layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        text = if (isEncryptedFolder) "Import Encrypted Files" else "Import Decrypted Files"
+        backgroundTintList = android.content.res.ColorStateList.valueOf(android.graphics.Color.parseColor("#FF9800"))
+        setTextColor(android.graphics.Color.BLACK)
+        
+        setOnClickListener {
+            isDirectImportMode = true
+            openFilePicker()
+        }
+    }
+
+
+    barLayout.addView(btnImportDirect)
+    mainContentWrapper.addView(barLayout, 0)
+    
+    
         onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 val currentPath = currentDir.absolutePath
@@ -289,6 +331,8 @@ lifecycleScope.launch(Dispatchers.IO) {
 }
     
     
+    
+    
     }
     
     override fun onResume() {
@@ -305,7 +349,7 @@ lifecycleScope.launch(Dispatchers.IO) {
     inactivityHandler.postDelayed(lockRunnable, IDLE_LOCK_TIMEOUT)
 }
 
-override fun onPause() {
+ override fun onPause() {
     super.onPause()
 
     lastTimestamp = System.currentTimeMillis()
@@ -737,24 +781,53 @@ private val pickStorageLocationLauncher = registerForActivityResult(
     if (result.resultCode == RESULT_OK) {
         val treeUri = result.data?.data ?: return@registerForActivityResult
         
-
         val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION
         contentResolver.takePersistableUriPermission(treeUri, takeFlags)
 
+
+        saveSavedStorageUri(treeUri)
 
         executeMoveToExternalStorage(treeUri, filesToMoveToStorage)
     }
 }
 
+private fun saveSavedStorageUri(uri: Uri) {
+    val prefs = getSharedPreferences("storage_prefs", MODE_PRIVATE)
+    prefs.edit().putString("external_tree_uri", uri.toString()).apply()
+}
+
+private fun getSavedStorageUri(): Uri? {
+    val prefs = getSharedPreferences("storage_prefs", MODE_PRIVATE)
+    val uriString = prefs.getString("external_tree_uri", null) ?: return null
+    return try {
+        val savedUri = Uri.parse(uriString)
+
+        val hasPermission = contentResolver.persistedUriPermissions.any { 
+            it.uri == savedUri && it.isWritePermission 
+        }
+        if (hasPermission) savedUri else null
+    } catch (e: Exception) {
+        null
+    }
+}
 
 private fun promptMoveToDeviceOrSDCard(files: List<File>) {
     filesToMoveToStorage = files
-    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+    
 
-        putExtra("android.provider.extra.SHOW_ADVANCED", true) 
+    val existingUri = getSavedStorageUri()
+    
+    if (existingUri != null) {
+
+        executeMoveToExternalStorage(existingUri, filesToMoveToStorage)
+    } else {
+
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE).apply {
+            putExtra("android.provider.extra.SHOW_ADVANCED", true) 
+        }
+        Toast.makeText(this, "Select your SD Card or Internal Storage root folder", Toast.LENGTH_LONG).show()
+        pickStorageLocationLauncher.launch(intent)
     }
-    Toast.makeText(this, "Select your SD Card or Internal Storage root folder", Toast.LENGTH_LONG).show()
-    pickStorageLocationLauncher.launch(intent)
 }
 
 private fun executeMoveToExternalStorage(treeUri: Uri, files: List<File>) {
@@ -839,29 +912,91 @@ private fun executeMoveToExternalStorage(treeUri: Uri, files: List<File>) {
 
 
     private fun setupPickers() {
-        addFileFab.setOnClickListener { openFilePicker() }
 
-        openDocumentLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (result.resultCode == Activity.RESULT_OK) {
-                val uris = mutableListOf<Uri>()
-                result.data?.clipData?.let { clip ->
-                    for (i in 0 until clip.itemCount) uris.add(clip.getItemAt(i).uri)
-                } ?: result.data?.data?.let { uris.add(it) }
+    addFileFab.setOnClickListener { 
+        isDirectImportMode = false
+        openFilePicker() 
+    }
 
-                lifecycleScope.launch {
-                    showLoadingDialog("Processing ${uris.size} files...")
-                    uris.forEach { uri ->
+    openDocumentLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val uris = mutableListOf<Uri>()
+            result.data?.clipData?.let { clip ->
+                for (i in 0 until clip.itemCount) uris.add(clip.getItemAt(i).uri)
+            } ?: result.data?.data?.let { uris.add(it) }
+
+            lifecycleScope.launch {
+                showLoadingDialog("Processing ${uris.size} files...")
+                uris.forEach { uri ->
+
+                    if (isDirectImportMode) {
+
+                        importFileDirectly(uri)
+                    } else {
+
                         if (isEncryptedFolder) encryptFileUri(uri, true)
                         else decryptFileUri(uri, true)
                     }
-                    loadFileList()
-                    hideLoadingDialog()
+
                 }
+                loadFileList()
+                hideLoadingDialog()
             }
         }
     }
+}
 
-    
+    private suspend fun importFileDirectly(uri: Uri) {
+    try {
+        withContext(Dispatchers.IO) {
+            val inputStream = contentResolver.openInputStream(uri) ?: return@withContext
+            val fileName = queryFileName(uri) ?: "file_${System.currentTimeMillis()}"
+            val fileSize = contentResolver.openAssetFileDescriptor(uri, "r")?.length ?: 0
+
+            val outputFile = if (isEncryptedFolder) {
+
+
+                val baseEncRoot = if (currentDir.absolutePath.startsWith(internalEncDir.absolutePath)) {
+                    internalEncDir
+                } else {
+                    encryptedDir
+                }
+
+
+                val relativePath = currentDir.absolutePath.removePrefix(baseEncRoot.absolutePath)
+
+
+                val encryptedName = if (fileName.endsWith(".enc")) fileName else "$fileName.enc"
+
+
+                getTargetFile(encryptedName, fileSize, relativePath)
+            } else {
+               
+                if (!currentDir.exists()) {
+                    currentDir.mkdirs()
+                }
+                
+
+                val cleanDecryptedName = fileName.removeSuffix(".enc")
+
+
+                File(currentDir, cleanDecryptedName)
+            }
+            
+
+            outputFile.outputStream().use { outputStream ->
+                inputStream.use { it.copyTo(outputStream) }
+            }
+            
+
+            deleteExternalFile(uri)
+        }
+    } catch (e: Exception) {
+        withContext(Dispatchers.Main) {
+            Toast.makeText(this@FolderFilesActivity, "Subfolder import failed: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+}
 
 
     private fun loadOrCreateMasterKey(): SecretKey {
@@ -1782,7 +1917,7 @@ private fun formatDate(timestamp: Long): String {
   private fun decryptFile(inputFile: File, outputFile: File) {
     isProcessing = true
     
-    // Expand the processing buffer to 2 Megabytes for maximum stream speed
+
     val bufferSize = 2 * 1024 * 1024 
     
     try {
@@ -1799,7 +1934,7 @@ private fun formatDate(timestamp: Long): String {
                             val cipher = javax.crypto.Cipher.getInstance("AES/GCM/NoPadding")
                             cipher.init(javax.crypto.Cipher.DECRYPT_MODE, masterKey, javax.crypto.spec.GCMParameterSpec(GCM_TAG_LENGTH, iv))
                             
-                            // Using the stable CipherInputStream structure with the expanded buffer
+
                             javax.crypto.CipherInputStream(bis, cipher).use { cis ->
                                 val buffer = ByteArray(bufferSize)
                                 var bytesRead: Int

@@ -197,7 +197,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="1. Tap 'Encrypted' to see all encrypted files and to encrypt new files. Decrypt files by clicking on them and providing authentication. --- You can encrypt multiple files. Rename, delete, move between subfolders, or share without moving them out of the app."
+                android:text="1. Tap 'Encrypted' to see all encrypted files and to encrypt new files. Decrypt files by clicking on them and providing authentication. ++ You can encrypt multiple files. Rename, delete, move between subfolders, or share without moving them out of the app."
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"
                 android:layout_marginBottom="4dp"/>
@@ -205,7 +205,15 @@
              <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="2. New in Update v3.0.2 and 3.0.3: Now Decrypt, re-encrypt and delete multiple files at the same time instead of one by one. Backup and export files to internal storage or on SD card. Fixed a security vulnerability that bypassed the login window during recovery."
+                android:text="2. New in Update v3.0.2 and 3.0.3: Now Decrypt, re-encrypt and delete multiple files at the same time instead of one by one. Backup and export files to internal storage or on SD card. Fixed a security vulnerability that bypassed the login window during recovery. -:- Long Press to choose Batch Operation -> Select Export -> Choose/Create Folder -> Allow Permission -> Now This Folder will be used for Future Export."
+                android:textColor="#BDBDBD"
+                android:textSize="14sp"
+                android:layout_marginBottom="4dp"/>
+                
+                <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="3. New in Update v3.0.5: The files exported to internal storage or an SD card can be brought back inside the app using the import button inside the encrypted and decrypted folders."
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"
                 android:layout_marginBottom="4dp"/>
@@ -213,7 +221,7 @@
              <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="3. Now Activist-Grade Security (v3.0): Never lose access even if you forget the recovery code. Strong hardware-backed KeyStore. - 5-minute RAM wipe. - Anti-forensic shredder. - Stealth logic. - Per-operation authentication with 5-minute cooldown. - Options for Password/Pattern/Biometrics (change mode anytime)."
+                android:text="4. Now Activist-Grade Security (v3.0): Never lose access even if you forget the recovery code. Strong hardware-backed KeyStore. - 5-minute RAM wipe. - Anti-forensic shredder. - Stealth logic. - Per-operation authentication with 5-minute cooldown. - Options for Password/Pattern/Biometrics (change mode anytime)."
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"
                 android:layout_marginBottom="4dp"/>
@@ -221,7 +229,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="4. Warning: Uninstalling or clearing app data will permanently delete all files."
+                android:text="5. Warning: Uninstalling or clearing app data will permanently delete all files."
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"
                 android:layout_marginBottom="4dp"/>
@@ -229,7 +237,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="5. Upgraded to AES/GCM/NoPadding with Legacy Support"
+                android:text="6. Upgraded to AES/GCM/NoPadding with Legacy Support"
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"/>
           

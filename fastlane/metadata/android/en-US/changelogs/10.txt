@@ -1,0 +1,7 @@
+v3.0.5 - Enhanced Files Import Feature
+
+Added a dedicated direct import feature for encrypted folders to bring back previously exported files exactly as they are, completely removing the limitation where using the standard add button caused exported files to get encrypted a second time.
+
+- Unified Directory Importing: Added a dynamic import button to let users bring raw files directly into both the Encrypted and Decrypted directory trees.
+- Subfolder Routing of Import: Programmed the file system to automatically respect the active subfolder level, dropping files exactly where the user is looking.
+- Frictionless Storage Handshake: Implemented persistent folder permission caching to completely eliminate repeated, annoying storage-picker popups.
