@@ -156,6 +156,8 @@ To build the APK on your local machine, follow these instructions.
 
 The Seek Privacy logo is property of SeeknWander. You may not use, copy, modify, or redistribute the logo without express permission from [SeeknWander](https://seeknwander.com). All Rights Reserved.
 
+#### Seekprivacy Created By Seeker - Founder of SeeknWander
+
 ---
 
 #android #security #privacy #encryption #activism #cryptography #antiforensics #cybersecurity #infosec #dataprivacy #antisurveillance #encryptiontools #open-source
