@@ -205,7 +205,7 @@
              <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="2. New in Update v3.0.2 and 3.0.3: Now Decrypt, re-encrypt and delete multiple files at the same time instead of one by one. Backup and export files to internal storage or on SD card. Fixed a security vulnerability that bypassed the login window during recovery. -:- Long Press to choose Batch Operation -> Select Export -> Choose/Create Folder -> Allow Permission -> Now This Folder will be used for Future Export."
+                android:text="2. New in Update (v3.0.2 - 3.0.3): Now Decrypt, re-encrypt and delete multiple files at the same time instead of one by one. Backup and export files to internal storage or on SD card. Fixed a security vulnerability that bypassed the login window during recovery. -:- Long Press to choose Batch Operation -> Select Export -> Choose/Create Folder -> Allow Permission -> Now This Folder will be used for Future Export."
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"
                 android:layout_marginBottom="4dp"/>
@@ -213,7 +213,7 @@
                 <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="3. New in Update v3.0.5: The files exported to internal storage or an SD card can be brought back inside the app using the import button inside the encrypted and decrypted folders."
+                android:text="3. New in Update (v3.0.5): The files exported to internal storage or an SD card can be brought back inside the app using the import button inside the encrypted and decrypted folders."
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"
                 android:layout_marginBottom="4dp"/>
@@ -237,7 +237,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="6. Upgraded to AES/GCM/NoPadding with Legacy Support"
+                android:text="6. 💡 New in Update (v3.5): Faster encryption-decryption using Tink - Added File Preview(Thumbnail) in Decrypted Folder"
                 android:textColor="#BDBDBD"
                 android:textSize="14sp"/>
           

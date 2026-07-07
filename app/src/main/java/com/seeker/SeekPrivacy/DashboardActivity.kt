@@ -782,8 +782,8 @@ private fun showNewPasswordDialog() {
 
     val formattedEmail = "$developerName <$developerEmail>"
     val body = "Device ID: $deviceId\n" +
-               "Request Type: RECOVERY\n\n" +
-               "I am requesting a bypass. " +
+               "Request Type: Dash-SETUP/RECOVERY\n\n" +
+               "I am setting/requesting a bypass token. " +
                "Please provide my token."
     
 

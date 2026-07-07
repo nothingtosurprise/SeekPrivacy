@@ -34,67 +34,136 @@ class FileAdapter(
     }
 
     override fun onBindViewHolder(holder: FileViewHolder, position: Int) {
-        val file = fileList[position]
-        holder.fileNameTextView.text = file.name
+    val file = fileList[position]
+    holder.fileNameTextView.text = file.name
 
+    // --- Selection UI ---
+    if (selectedFiles.contains(file)) {
+        holder.itemView.setBackgroundColor(Color.parseColor("#33009688"))
+    } else {
+        holder.itemView.setBackgroundColor(Color.TRANSPARENT) 
+    }
+
+
+    Glide.with(holder.itemView.context).clear(holder.fileIcon)
+
+
+    val typedValue = android.util.TypedValue()
+    holder.itemView.context.theme.resolveAttribute(com.google.android.material.R.attr.colorPrimary, typedValue, true)
+    val orangeTintList = android.content.res.ColorStateList.valueOf(typedValue.data)
+
+    val extension = file.extension.lowercase()
+    val isImage = extension in listOf("jpg", "jpeg", "png", "webp", "heic")
+    val isVideo = extension in listOf("mp4", "mkv", "mov", "avi", "3gp", "webm")
+
+
+    Glide.with(holder.itemView.context).clear(holder.fileIcon)
+
+    when {
+        file.isDirectory -> {
+            holder.fileIcon.imageTintList = orangeTintList 
+            holder.fileIcon.setImageResource(R.drawable.ic_folder)
+        }
+        file.name.endsWith(".enc") -> {
+            holder.fileIcon.imageTintList = orangeTintList 
+            holder.fileIcon.setImageResource(R.drawable.ic_lock)
+        }
+        isImage -> {
+
+            holder.fileIcon.imageTintList = null
+
+            Glide.with(holder.itemView.context)
+                .asBitmap()
+                .load(file.readBytes()) 
+                .override(200, 200)
+                .centerCrop()
+                .placeholder(R.drawable.ic_file)
+                .error(R.drawable.ic_file)
+                .listener(object : com.bumptech.glide.request.RequestListener<android.graphics.Bitmap> {
+                    override fun onLoadFailed(
+                        e: com.bumptech.glide.load.engine.GlideException?,
+                        model: Any?,
+                        target: com.bumptech.glide.request.target.Target<android.graphics.Bitmap>?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+
+                        holder.fileIcon.imageTintList = orangeTintList
+                        return false 
+                    }
+
+                    override fun onResourceReady(
+                        resource: android.graphics.Bitmap?,
+                        model: Any?,
+                        target: com.bumptech.glide.request.target.Target<android.graphics.Bitmap>?,
+                        dataSource: com.bumptech.glide.load.DataSource?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        return false
+                    }
+                })
+                .into(holder.fileIcon)
+        }
+        isVideo -> {
+
+            holder.fileIcon.imageTintList = null
+
+            Glide.with(holder.itemView.context)
+                .asBitmap()
+                .load(java.io.File(file.absolutePath)) 
+                .frame(1000000)
+                .override(200, 200)
+                .centerCrop()
+                .placeholder(R.drawable.ic_file)
+                .error(R.drawable.ic_file)
+                .listener(object : com.bumptech.glide.request.RequestListener<android.graphics.Bitmap> {
+                    override fun onLoadFailed(
+                        e: com.bumptech.glide.load.engine.GlideException?,
+                        model: Any?,
+                        target: com.bumptech.glide.request.target.Target<android.graphics.Bitmap>?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+
+                        holder.fileIcon.imageTintList = orangeTintList
+                        return false
+                    }
+
+                    override fun onResourceReady(
+                        resource: android.graphics.Bitmap?,
+                        model: Any?,
+                        target: com.bumptech.glide.request.target.Target<android.graphics.Bitmap>?,
+                        dataSource: com.bumptech.glide.load.DataSource?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        return false
+                    }
+                })
+                .into(holder.fileIcon)
+        }
+        else -> {
+            holder.fileIcon.imageTintList = orangeTintList 
+            holder.fileIcon.setImageResource(R.drawable.ic_file)
+        }
+    }
         
-        if (selectedFiles.contains(file)) {
-            holder.itemView.setBackgroundColor(Color.parseColor("#33009688"))
+        
+
+    holder.itemView.setOnClickListener {
+        if (isSelectionMode) {
+            toggleSelection(file) 
         } else {
-            holder.itemView.setBackgroundColor(Color.TRANSPARENT) 
+            onItemClick(file)
         }
+    }
 
-        Glide.with(holder.itemView.context).clear(holder.fileIcon)
-
-        when {
-            file.isDirectory -> {
-                holder.fileIcon.setImageResource(R.drawable.ic_folder)
-            }
-            file.name.endsWith(".enc") -> {
-                holder.fileIcon.setImageResource(R.drawable.ic_lock)
-            }
-            else -> {
-                val path = file.absolutePath
-                val extension = file.extension.lowercase()
-                val isSupported = extension in listOf("jpg", "jpeg", "png", "webp")
-
-                if (isSupported) {
-                    Glide.with(holder.itemView.context)
-                        .asBitmap() 
-                        .load(path) 
-                        .override(200, 200)
-                        .centerCrop()
-                        .diskCacheStrategy(com.bumptech.glide.load.engine.DiskCacheStrategy.NONE)
-                        .skipMemoryCache(true)
-                        .placeholder(R.drawable.ic_file)
-                        .error(R.drawable.ic_file)
-                        .into(holder.fileIcon)
-                } else {
-                    holder.fileIcon.setImageResource(R.drawable.ic_file)
-                }
-            }
+    holder.itemView.setOnLongClickListener {
+        if (!isSelectionMode) {
+            toggleSelection(file) 
+        } else {
+            onItemClick(file) 
         }
-
-        // --- Click Logic ---
-holder.itemView.setOnClickListener {
-    if (isSelectionMode) {
-
-        toggleSelection(file) 
-    } else {
-        onItemClick(file)
+        true
     }
 }
-
-holder.itemView.setOnLongClickListener {
-    if (!isSelectionMode) {
-        toggleSelection(file) 
-    } else {
-
-        onItemClick(file) 
-    }
-    true
-}
-    }
 
     override fun getItemCount(): Int = fileList.size
 

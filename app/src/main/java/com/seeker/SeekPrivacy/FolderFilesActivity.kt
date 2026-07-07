@@ -32,6 +32,9 @@ import java.io.*
 import java.security.*
 import java.security.spec.X509EncodedKeySpec
 import javax.crypto.*
+import javax.crypto.Cipher
+import javax.crypto.CipherOutputStream
+import javax.crypto.CipherInputStream
 import javax.crypto.spec.GCMParameterSpec
 import javax.crypto.spec.IvParameterSpec
 import androidx.activity.OnBackPressedCallback
@@ -59,6 +62,21 @@ import android.widget.Button
 import java.nio.channels.FileChannel
 
 
+//Google Init
+import com.google.crypto.tink.InsecureSecretKeyAccess
+import com.google.crypto.tink.TinkProtoKeysetFormat
+import com.google.crypto.tink.streamingaead.StreamingAeadConfig
+import com.google.crypto.tink.StreamingAead
+import com.google.crypto.tink.proto.AesGcmHkdfStreamingParams
+import com.google.crypto.tink.proto.AesGcmHkdfStreamingKey
+import com.google.crypto.tink.proto.HashType
+import com.google.crypto.tink.proto.KeyData
+import com.google.crypto.tink.proto.KeyStatusType
+import com.google.crypto.tink.proto.Keyset
+import com.google.crypto.tink.proto.OutputPrefixType
+import com.google.crypto.tink.shaded.protobuf.ByteString
+import javax.crypto.SecretKey
+
 
 
 
@@ -75,6 +93,7 @@ class FolderFilesActivity : AppCompatActivity() {
 
 
     private val VERSION_GCM: Byte = 0x01
+    private val VERSION_TINK: Byte = 0x02
     private val GCM_IV_LENGTH = 12
     private val GCM_TAG_LENGTH = 128
     private val KEYSTORE_ALIAS = "seekPrivacyRSAKey"
@@ -101,10 +120,16 @@ class FolderFilesActivity : AppCompatActivity() {
     private var lastTimestamp: Long = 0L
 }
 
+   
 
-private val inactivityHandler = android.os.Handler(android.os.Looper.getMainLooper())
-private lateinit var lockRunnable: Runnable 
-private var isProcessing = false
+    private val inactivityHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private lateinit var lockRunnable: Runnable 
+    private var isProcessing = false
+
+    private var BUFFER_SIZE = 64 * 1024
+    
+    
+    
 
 
 
@@ -169,7 +194,10 @@ private var isProcessing = false
     
     private var isDirectImportMode = false
     private lateinit var btnImportDirect: Button
-
+    
+    
+    
+    
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -206,7 +234,7 @@ private var isProcessing = false
         
      
     
-
+    StreamingAeadConfig.register()
 
     isEncryptedFolder = intent.getBooleanExtra("isEncryptedFolder", true)
     val rawPass = intent.getStringExtra("verificationString") ?: ""
@@ -546,7 +574,7 @@ private fun showActiveSelectionMenu() {
                 1 -> confirmBatchDeletion(selectedList)
                 2 -> showBatchMoveDialog(selectedList)
                 3 -> promptMoveToDeviceOrSDCard(selectedList)
-                4 -> fileAdapter.clearSelection() // Cancel selection
+                4 -> fileAdapter.clearSelection() 
             }
         }
         .setCancelable(false) 
@@ -1281,27 +1309,81 @@ private fun unwrapAESKey(wrappedKey: ByteArray): SecretKey {
         }
     }
 }
+    
+    
+    
+    private fun getTinkStreamingAead(rawSecretKey: SecretKey): StreamingAead {
+
+    StreamingAeadConfig.register()
+
+    val keyBytes = rawSecretKey.encoded
+    val params = AesGcmHkdfStreamingParams.newBuilder()
+        .setCiphertextSegmentSize(4096)
+        .setDerivedKeySize(keyBytes.size)
+        .setHkdfHashType(HashType.SHA256)
+        .build()
+
+    val protoKey = AesGcmHkdfStreamingKey.newBuilder()
+        .setVersion(0)
+        .setParams(params)
+        .setKeyValue(ByteString.copyFrom(keyBytes))
+        .build()
+
+    val keyData = KeyData.newBuilder()
+        .setTypeUrl("type.googleapis.com/google.crypto.tink.AesGcmHkdfStreamingKey")
+        .setValue(protoKey.toByteString())
+        .setKeyMaterialType(KeyData.KeyMaterialType.SYMMETRIC)
+        .build()
+
+    val keyId = 1
+    val key = Keyset.Key.newBuilder()
+        .setKeyData(keyData)
+        .setStatus(KeyStatusType.ENABLED)
+        .setKeyId(keyId)
+        .setOutputPrefixType(OutputPrefixType.RAW)
+        .build()
+
+    val keyset = Keyset.newBuilder()
+        .setPrimaryKeyId(keyId)
+        .addKey(key)
+        .build()
+
+
+
+    val keysetHandle = TinkProtoKeysetFormat.parseKeyset(
+        keyset.toByteArray(), 
+        InsecureSecretKeyAccess.get()
+    )
+
+    return keysetHandle.getPrimitive(StreamingAead::class.java)
+}
+    
+    
     private fun encryptFile(inputStream: InputStream, outputFile: File) {
     isProcessing = true 
     try {
-        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
-        val iv = ByteArray(GCM_IV_LENGTH).apply { java.security.SecureRandom().nextBytes(this) }
-        
-        cipher.init(Cipher.ENCRYPT_MODE, masterKey, GCMParameterSpec(GCM_TAG_LENGTH, iv))
-        
+        val masterKey = loadOrCreateMasterKey()
+        val streamingAead = getTinkStreamingAead(masterKey)
+        val associatedData = ByteArray(0) 
 
-        inputStream.use { input ->
-            java.io.FileOutputStream(outputFile).use { fos ->
-                fos.write(VERSION_GCM.toInt()) 
-                fos.write(iv)
-                javax.crypto.CipherOutputStream(fos, cipher).use { cos -> 
-                    val buffer = ByteArray(64 * 1024) // Fast 64KB Buffer
-                    var bytesRead: Int
-                    while (input.read(buffer).also { bytesRead = it } != -1) {
-                        cos.write(buffer, 0, bytesRead)
+        FileOutputStream(outputFile).use { fos: FileOutputStream ->
+            BufferedOutputStream(fos, BUFFER_SIZE).use { bos: BufferedOutputStream ->
+                
+
+                bos.write(VERSION_TINK.toInt())
+                
+
+                streamingAead.newEncryptingStream(bos, associatedData).use { encryptingStream: java.io.OutputStream ->
+                    inputStream.use { input: InputStream ->
+                        val buffer = ByteArray(BUFFER_SIZE)
+                        var bytesRead = 0
+                        while (input.read(buffer).also { bytesRead = it } != -1) {
+                            encryptingStream.write(buffer, 0, bytesRead)
+                        }
                     }
-                    cos.flush()
+                    encryptingStream.flush()
                 }
+                bos.flush()
             }
         }
     } finally {
@@ -1310,6 +1392,85 @@ private fun unwrapAESKey(wrappedKey: ByteArray): SecretKey {
     }
 }
 
+private fun decryptFile(inputFile: File, outputFile: File) {
+    isProcessing = true
+    try {
+        val masterKey = loadOrCreateMasterKey()
+
+        FileInputStream(inputFile).use { fis: FileInputStream ->
+            BufferedInputStream(fis, BUFFER_SIZE).use { bis: BufferedInputStream ->
+                val firstByte = bis.read()
+                if (firstByte == -1) return 
+
+                FileOutputStream(outputFile).use { fos: FileOutputStream ->
+                    BufferedOutputStream(fos, BUFFER_SIZE).use { bos: BufferedOutputStream ->
+                        
+                        when (firstByte) {
+                            VERSION_TINK.toInt() -> {
+                                // -------------------------------------------------------
+                                // 1. NEW GOOGLE TINK (Fast, modern streaming)
+                                // -------------------------------------------------------
+                                val streamingAead = getTinkStreamingAead(masterKey)
+                                val associatedData = ByteArray(0)
+                                
+                                streamingAead.newDecryptingStream(bis, associatedData).use { decryptingStream: java.io.InputStream ->
+                                    val buffer = ByteArray(BUFFER_SIZE)
+                                    var bytesRead = 0
+                                    while (decryptingStream.read(buffer).also { bytesRead = it } != -1) {
+                                        bos.write(buffer, 0, bytesRead)
+                                    }
+                                }
+                            }
+
+                            VERSION_GCM.toInt() -> {
+                                // -------------------------------------------------------
+                                // 2. STANDARD JAVA GCM (old slow implementation fallback)
+                                // -------------------------------------------------------
+                                val iv = ByteArray(GCM_IV_LENGTH).apply { bis.read(this) }
+                                val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+                                cipher.init(Cipher.DECRYPT_MODE, masterKey, GCMParameterSpec(GCM_TAG_LENGTH, iv))
+                                
+                                javax.crypto.CipherInputStream(bis, cipher).use { cis: java.io.InputStream ->
+                                    val buffer = ByteArray(BUFFER_SIZE)
+                                    var bytesRead = 0
+                                    while (cis.read(buffer).also { bytesRead = it } != -1) {
+                                        bos.write(buffer, 0, bytesRead)
+                                    }
+                                }
+                            }
+
+                            else -> {
+                                // -------------------------------------------------------
+                                // 3. LEGACY CBC MODE (absolute oldest format fallback)
+                                // -------------------------------------------------------
+                                val iv = ByteArray(16).apply {
+                                    this[0] = firstByte.toByte()
+                                    bis.read(this, 1, 15)
+                                }
+                                val cipher = Cipher.getInstance("AES/CBC/PKCS5Padding")
+                                cipher.init(Cipher.DECRYPT_MODE, masterKey, IvParameterSpec(iv))
+                                
+                                javax.crypto.CipherInputStream(bis, cipher).use { cis: java.io.InputStream ->
+                                    val buffer = ByteArray(BUFFER_SIZE)
+                                    var bytesRead = 0
+                                    while (cis.read(buffer).also { bytesRead = it } != -1) {
+                                        bos.write(buffer, 0, bytesRead)
+                                    }
+                                }
+                            }
+                        }
+                        bos.flush()
+                    }
+                }
+            }
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+    } finally {
+        isProcessing = false
+        resetInactivityTimer()
+    }
+}
 
 
 private fun resetInactivityTimer() {
@@ -1914,61 +2075,7 @@ private fun formatDate(timestamp: Long): String {
     }
 }
 
-  private fun decryptFile(inputFile: File, outputFile: File) {
-    isProcessing = true
-    
-
-    val bufferSize = 2 * 1024 * 1024 
-    
-    try {
-        java.io.FileInputStream(inputFile).use { fis ->
-            java.io.BufferedInputStream(fis, bufferSize).use { bis ->
-                val firstByte = bis.read()
-                if (firstByte == -1) return 
-                
-                java.io.FileOutputStream(outputFile).use { fos ->
-                    java.io.BufferedOutputStream(fos, bufferSize).use { bos ->
-                        
-                        if (firstByte.toInt() == VERSION_GCM.toInt()) {
-                            val iv = ByteArray(GCM_IV_LENGTH).apply { bis.read(this) }
-                            val cipher = javax.crypto.Cipher.getInstance("AES/GCM/NoPadding")
-                            cipher.init(javax.crypto.Cipher.DECRYPT_MODE, masterKey, javax.crypto.spec.GCMParameterSpec(GCM_TAG_LENGTH, iv))
-                            
-
-                            javax.crypto.CipherInputStream(bis, cipher).use { cis ->
-                                val buffer = ByteArray(bufferSize)
-                                var bytesRead: Int
-                                while (cis.read(buffer).also { bytesRead = it } != -1) {
-                                    bos.write(buffer, 0, bytesRead)
-                                }
-                            }
-                        } else {
-                            // Legacy CBC Mode
-                            val iv = ByteArray(16).apply {
-                                this[0] = firstByte.toByte()
-                                bis.read(this, 1, 15)
-                            }
-                            val cipher = javax.crypto.Cipher.getInstance("AES/CBC/PKCS5Padding")
-                            cipher.init(javax.crypto.Cipher.DECRYPT_MODE, masterKey, javax.crypto.spec.IvParameterSpec(iv))
-                            
-                            javax.crypto.CipherInputStream(bis, cipher).use { cis ->
-                                val buffer = ByteArray(bufferSize)
-                                var bytesRead: Int
-                                while (cis.read(buffer).also { bytesRead = it } != -1) {
-                                    bos.write(buffer, 0, bytesRead)
-                                }
-                            }
-                        }
-                        bos.flush()
-                    }
-                }
-            }
-        }
-    } finally {
-        isProcessing = false
-        resetInactivityTimer()
-    }
-}
+  
  private fun performDecryption(file: File) {
     showLoadingDialog("Decrypting File...")
     lifecycleScope.launch {
